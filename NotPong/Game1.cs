@@ -44,18 +44,20 @@ namespace NotPong
                 Exit();
 
             // TODO: Add your update logic here
-            var kstate = Keyboard.GetState();
+            //var kstate = Keyboard.GetState();
 
-            if (kstate.IsKeyDown(Keys.Up))
-                ballPosition.Y -= ballSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
-            if (kstate.IsKeyDown(Keys.Down))
-                ballPosition.Y += ballSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
-            if (kstate.IsKeyDown(Keys.Left))
-                ballPosition.X -= ballSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
-            if (kstate.IsKeyDown(Keys.Right))
-                ballPosition.X += ballSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            //if (kstate.IsKeyDown(Keys.Up))
+            //    ballPosition.Y -= ballSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            //if (kstate.IsKeyDown(Keys.Down))
+            //    ballPosition.Y += ballSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            //if (kstate.IsKeyDown(Keys.Left))
+            //    ballPosition.X -= ballSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            //if (kstate.IsKeyDown(Keys.Right))
+            //    ballPosition.X += ballSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            var mouse = Mouse.GetState(Window);
+            //var mouse = Mouse.GetState(Window);
+
+            SceneManager.CurrentScene.Update(gameTime);
 
             base.Update(gameTime);
         }
@@ -66,8 +68,9 @@ namespace NotPong
 
             // TODO: Add your drawing code here
             _spriteBatch.Begin();
-            var ballOrigin = new Vector2(ballTexture.Width / 2, ballTexture.Height / 2);
-            _spriteBatch.Draw(ballTexture, ballPosition, null, Color.White, 0f, ballOrigin, Vector2.One, SpriteEffects.None, 0f);
+            //var ballOrigin = new Vector2(ballTexture.Width / 2, ballTexture.Height / 2);
+            //_spriteBatch.Draw(ballTexture, ballPosition, null, Color.White, 0f, ballOrigin, Vector2.One, SpriteEffects.None, 0f);
+            SceneManager.CurrentScene.Draw(gameTime, _spriteBatch);
             _spriteBatch.End();
 
             base.Draw(gameTime);
