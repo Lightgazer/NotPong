@@ -6,6 +6,6 @@ namespace NotPong
     interface IScene
     {
         public void Update(GameTime gameTime);
-        public void Draw(GameTime gameTime, SpriteBatch spriteBatch);
+        public void Draw(GameTime gameTime, GraphicsDeviceManager graphics, SpriteBatch spriteBatch);
     }
 }

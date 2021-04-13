@@ -23,6 +23,7 @@ namespace NotPong
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
+            var center = new Vector2(_graphics.PreferredBackBufferHeight / 2, _graphics.PreferredBackBufferWidth / 2);
             ballPosition = new Vector2(_graphics.PreferredBackBufferWidth / 2, _graphics.PreferredBackBufferHeight / 2);
             ballSpeed = 100f;
 
@@ -70,7 +71,7 @@ namespace NotPong
             _spriteBatch.Begin();
             //var ballOrigin = new Vector2(ballTexture.Width / 2, ballTexture.Height / 2);
             //_spriteBatch.Draw(ballTexture, ballPosition, null, Color.White, 0f, ballOrigin, Vector2.One, SpriteEffects.None, 0f);
-            SceneManager.CurrentScene.Draw(gameTime, _spriteBatch);
+            SceneManager.CurrentScene.Draw(gameTime, _graphics, _spriteBatch);
             _spriteBatch.End();
 
             base.Draw(gameTime);
