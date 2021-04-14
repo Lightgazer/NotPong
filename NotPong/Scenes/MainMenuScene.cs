@@ -9,20 +9,21 @@ namespace NotPong.Scenes
 {
     //сделать родителя
     //добавить имя
-    class StartScene : IScene
+    class MainMenuScene : IScene
     {
         private Texture2D buttonTexture;
         private Rectangle buttonRectangle;
         private MouseState lastMouseState;
+        private Vector2 center;
 
-        public StartScene(Texture2D buttonTexture,  Vector2 center)
+        public MainMenuScene(Texture2D buttonTexture,  Vector2 center)
         {
             this.buttonTexture = buttonTexture;
+            this.center = center;
 
-            var someSpace = new Vector2(0, center.Y / 4);
-            var buttonOrigin = new Vector2(buttonTexture.Width / 2, buttonTexture.Height / 2);
-            var buttonVector = center - someSpace + buttonOrigin;
-            buttonRectangle = new Rectangle(buttonVector.ToPoint(), new Point(buttonTexture.Width, buttonTexture.Height));
+            var buttonSize = new Vector2(buttonTexture.Width, buttonTexture.Height);
+            var buttonVector = center - buttonSize / 2;
+            buttonRectangle = new Rectangle(buttonVector.ToPoint(), buttonSize.ToPoint());
 
             lastMouseState = Mouse.GetState();
         }

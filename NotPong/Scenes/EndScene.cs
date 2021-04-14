@@ -22,12 +22,12 @@ namespace NotPong.Scenes
             this.messageTexture = messageTexture;
 
             var someSpace = new Vector2(0, center.Y / 4);
-            var buttonOrigin = new Vector2(buttonTexture.Width / 2, buttonTexture.Height / 2);
-            var buttonVector = center - someSpace + buttonOrigin;
-            buttonRectangle = new Rectangle(buttonVector.ToPoint(), new Point(buttonTexture.Width, buttonTexture.Height));
-            var messageOrigin = new Vector2(messageTexture.Width / 2, messageTexture.Height / 2);
-            var messageVector = center + someSpace + messageOrigin;
-            messageRectangle = new Rectangle(messageVector.ToPoint(), new Point(messageTexture.Width, messageTexture.Height));
+            var buttonSize = new Vector2(buttonTexture.Width, buttonTexture.Height);
+            var buttonVector = center - someSpace - buttonSize / 2;
+            buttonRectangle = new Rectangle(buttonVector.ToPoint(), buttonSize.ToPoint());
+            var messageSize = new Vector2(messageTexture.Width, messageTexture.Height);
+            var messageVector = center + someSpace - messageSize / 2;
+            messageRectangle = new Rectangle(messageVector.ToPoint(), messageSize.ToPoint());
 
             lastMouseState = Mouse.GetState();
         }

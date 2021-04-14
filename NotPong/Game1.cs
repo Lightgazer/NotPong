@@ -1,42 +1,49 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using NotPong.Scenes;
 
 namespace NotPong
 {
     public class Game1 : Game
     {
-        private Texture2D ballTexture;
-        private Vector2 ballPosition;
-        float ballSpeed;
-
-        private GraphicsDeviceManager _graphics;
-        private SpriteBatch _spriteBatch;
+        private GraphicsDeviceManager graphics;
+        private SpriteBatch spriteBatch;
+        //private Texture2D ballTexture;
 
         public Game1()
         {
-            _graphics = new GraphicsDeviceManager(this);
+            graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
         }
 
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
-            var center = new Vector2(_graphics.PreferredBackBufferHeight / 2, _graphics.PreferredBackBufferWidth / 2);
-            ballPosition = new Vector2(_graphics.PreferredBackBufferWidth / 2, _graphics.PreferredBackBufferHeight / 2);
-            ballSpeed = 100f;
+            graphics.PreferredBackBufferHeight = 600;
+            graphics.ApplyChanges();
+
+            WindowSize.height = graphics.PreferredBackBufferHeight;
+            WindowSize.width = graphics.PreferredBackBufferWidth;
 
             base.Initialize();
         }
 
         protected override void LoadContent()
         {
-            _spriteBatch = new SpriteBatch(GraphicsDevice);
+            spriteBatch = new SpriteBatch(GraphicsDevice);
 
+            var center = new Vector2(WindowSize.width / 2, WindowSize.height / 2);
+            var playTexture = Content.Load<Texture2D>("buttons/play");
+            var okTexture = Content.Load<Texture2D>("buttons/ok");
+            var gameOverTexture = Content.Load<Texture2D>("gameover");
+            var gameScene = new GameScene();
+            gameScene.Load(Content);
+            SceneManager.AddScene(new MainMenuScene(playTexture, center));
+            SceneManager.AddScene(gameScene);
+            SceneManager.AddScene(new EndScene(okTexture, gameOverTexture, center));
             // TODO: use this.Content to load your game content here
-            ballTexture = Content.Load<Texture2D>("ball");
-            //ballTexture = Content.Load<Texture2D>("blocks/block0");
+            //ballTexture = Content.Load<Texture2D>("ball");
         }
 
         protected override void Update(GameTime gameTime)
@@ -65,16 +72,19 @@ namespace NotPong
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(Color.Black);
 
             // TODO: Add your drawing code here
-            _spriteBatch.Begin();
+            spriteBatch.Begin();
+            //var center = new Vector2(_graphics.PreferredBackBufferWidth / 2, _graphics.PreferredBackBufferHeight / 2);
             //var ballOrigin = new Vector2(ballTexture.Width / 2, ballTexture.Height / 2);
-            //_spriteBatch.Draw(ballTexture, ballPosition, null, Color.White, 0f, ballOrigin, Vector2.One, SpriteEffects.None, 0f);
-            SceneManager.CurrentScene.Draw(gameTime, _graphics, _spriteBatch);
-            _spriteBatch.End();
+            //_spriteBatch.Draw(ballTexture, center, null, Color.White, 0f, ballOrigin, Vector2.One, SpriteEffects.None, 0f);
+            SceneManager.CurrentScene.Draw(gameTime, graphics, spriteBatch);
+            spriteBatch.End();
 
             base.Draw(gameTime);
         }
     }
 }
+
+//System.Diagnostics.Debug.WriteLine(indexX.ToString() + " " + indexY.ToString());

@@ -24,7 +24,11 @@ namespace NotPong
 
         public static void LoadScene(int index)
         {
-            if (scenes.Count > index) currentIndex = index;
+            if (scenes.Count > index)
+            {
+                currentIndex = index;
+                CurrentScene.Start();
+            }
         }
     }
 }
