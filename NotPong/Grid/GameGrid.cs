@@ -11,22 +11,27 @@ namespace NotPong
 {
     class GameGrid
     {
+        public IScore Score { private get; set; }
+
         private static int gridSize = GameSettings.gridSize;
         private static int blockSize = GameSettings.blockSize;
-        private static Vector2 origin = new Vector2(blockSize / 2);
         private static readonly Random random = new Random();
 
         private Texture2D[] blockTextures;
         private Texture2D frameTexture;
+        private Texture2D lineTexture;
+        private Texture2D bombTexture;
         private Block[,] grid = new Block[gridSize, gridSize];
         private MouseState lastMouseState;
         private Rectangle gridRectangle;
         private Tuple<int, int> selectedIndex;
 
-        public GameGrid(Texture2D[] blockTextures, Texture2D frameTexture)
+        public GameGrid(Texture2D[] blockTextures, Texture2D frameTexture, Texture2D lineTexture, Texture2D bombTexture)
         {
             this.blockTextures = blockTextures;
             this.frameTexture = frameTexture;
+            this.lineTexture = lineTexture;
+            this.bombTexture = bombTexture;
             PopulateGrid();
 
             gridRectangle = new Rectangle(
@@ -43,6 +48,7 @@ namespace NotPong
             {
                 TriggerMatches();
                 ReturnBlocks();
+                Score.Add(CountDead());
             }
             if (IsReadyForDrop()) TriggerDrop();
             if (IsIdle())
@@ -74,7 +80,7 @@ namespace NotPong
         public void Draw(SpriteBatch spriteBatch)
         {
             var padding = new Vector2(gridRectangle.Location.X, gridRectangle.Location.Y);
-            DrawCells(spriteBatch, padding);
+            DrawBlocks(spriteBatch, padding);
             DrawFrame(spriteBatch, padding);
         }
 
@@ -88,7 +94,7 @@ namespace NotPong
             }
         }
 
-        private void DrawCells(SpriteBatch spriteBatch, Vector2 padding)
+        private void DrawBlocks(SpriteBatch spriteBatch, Vector2 padding)
         {
             for (int indexX = 0; indexX < gridSize; indexX++)
             {
@@ -96,22 +102,9 @@ namespace NotPong
                 {
                     var block = grid[indexX, indexY];
                     var position = new Vector2((indexX * blockSize), (indexY * blockSize));
-                    position += block.MovementDisplacement;
                     position += padding;
-                    position += origin;
-                    spriteBatch.Draw(
-                        blockTextures[block.type],
-                        position,
-                        null,
-                        Color.White,
-                        0f,
-                        origin,
-                        block.Size,
-                        SpriteEffects.None,
-                        0f
-                        );
+                    block.Draw(spriteBatch, position);
                 }
-
             }
         }
 
@@ -136,28 +129,36 @@ namespace NotPong
                     }
                     else
                     {
-                        KillBlocks(matchChain);
+                        KillBlocks(matchChain, vertical);
                         currentType = block.type;
                         matchChain.Clear();
                         matchChain.Add(block);
                     }
                 }
-                KillBlocks(matchChain);
+                KillBlocks(matchChain, vertical);
             }
         }
 
-        private void KillBlocks(List<Block> matchChain)
+        private void KillBlocks(List<Block> matchChain, bool vertical)
         {
-            if (matchChain.Count > 2)
+            if (matchChain.Count < 3) return;
+            matchChain.ForEach(block =>
             {
-                matchChain.ForEach(block =>
+                block.Fire();
+                if (block.state == BlockState.Suspect && matchChain.Count > 3)
                 {
-                    //здесь проверка на суспект и коунт
+                    if (matchChain.Count > 4)
+                        block.Bonus = new Bonus { BonusTexture = bombTexture };
+                    else if (matchChain.Count > 3)
+                        block.Bonus = new Bonus { BonusTexture = lineTexture };
+                    block.state = BlockState.Idle;
+                }
+                else
+                {
                     //здесь запуск бонуса
-                    block.Fire();
                     block.state = BlockState.Dead;
-                });
-            }
+                }
+            });
         }
 
 
@@ -180,12 +181,12 @@ namespace NotPong
             while (y > 0)
             {
                 grid[x, y] = grid[x, y - 1];
-                grid[x, y].MoveFrom(Direction.Up);
+                grid[x, y].MoveFrom(new Vector2(0, -1));
                 y--;
             }
 
             grid[x, 0] = CreateBlock();
-            grid[x, 0].MoveFrom(Direction.Up);
+            grid[x, 0].MoveFrom(new Vector2(0, -1));
         }
 
         private bool IsReadyForMatch()
@@ -228,34 +229,25 @@ namespace NotPong
 
         private void ReturnBlocks()
         {
-            //welp не нужно было 2d массив использовать
-            var index = grid.Cast<Block>().ToList().FindIndex(block => block.state == BlockState.Suspect);
-            if (index == -1) return;
-            var first = new Tuple<int, int>(index / gridSize, index % gridSize);
-
-            Tuple<int, int> second;
-            if (grid[first.Item1 + 1, first.Item2].state == BlockState.Suspect)
+            var firstIndex = grid.Cast<Block>().ToList().FindIndex(block => block.state == BlockState.Suspect);
+            var secondIndex = grid.Cast<Block>().ToList().FindLastIndex(block => block.state == BlockState.Suspect);
+            if (firstIndex == -1)
+                return;
+            else if (firstIndex == secondIndex)
             {
-                second = new Tuple<int, int>(first.Item1 + 1, first.Item2);
-            }
-            else if (grid[first.Item1 - 1, first.Item2].state == BlockState.Suspect)
-            {
-                second = new Tuple<int, int>(first.Item1 - 1, first.Item2);
-            }
-            else if (grid[first.Item1, first.Item2 + 1].state == BlockState.Suspect)
-            {
-                second = new Tuple<int, int>(first.Item1, first.Item2 + 1);
-            }
-            else if (grid[first.Item1, first.Item2 - 1].state == BlockState.Suspect)
-            {
-                second = new Tuple<int, int>(first.Item1, first.Item2 - 1);
+                grid[firstIndex / gridSize, firstIndex % gridSize].state = BlockState.Idle;
             }
             else
             {
-                return;
+                var first = new Tuple<int, int>(firstIndex / gridSize, firstIndex % gridSize);
+                var second = new Tuple<int, int>(secondIndex / gridSize, secondIndex % gridSize);
+                SwapBlocks(first, second, BlockState.Idle);
             }
+        }
 
-            SwapBlocks(first, second, BlockState.Idle);
+        private int CountDead()
+        {
+            return grid.Cast<Block>().Where(block => block.state == BlockState.Dead).Count();
         }
 
         private Tuple<int, int> GetCellClick()
@@ -281,10 +273,10 @@ namespace NotPong
                     grid[indexX, indexY] = CreateBlock();
         }
 
-        private static Block CreateBlock()
+        private Block CreateBlock()
         {
             var type = random.Next(GameScene.numberOfBlockTypes);
-            Block block = new Block(type);
+            var block = new Block(type, blockTextures[type]);
             return block;
         }
     }
