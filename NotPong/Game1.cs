@@ -20,11 +20,10 @@ namespace NotPong
 
         protected override void Initialize()
         {
-            graphics.PreferredBackBufferHeight = 600;
+            graphics.PreferredBackBufferHeight = GameSettings.height;
+            graphics.PreferredBackBufferWidth = GameSettings.width;
             graphics.ApplyChanges();
 
-            WindowSize.height = graphics.PreferredBackBufferHeight;
-            WindowSize.width = graphics.PreferredBackBufferWidth;
 
             base.Initialize();
         }
@@ -33,7 +32,7 @@ namespace NotPong
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            var center = new Vector2(WindowSize.width / 2, WindowSize.height / 2);
+            var center = new Vector2(GameSettings.width / 2, GameSettings.height / 2);
             var playTexture = Content.Load<Texture2D>("buttons/play");
             var okTexture = Content.Load<Texture2D>("buttons/ok");
             var gameOverTexture = Content.Load<Texture2D>("gameover");
