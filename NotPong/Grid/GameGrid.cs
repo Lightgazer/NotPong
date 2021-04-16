@@ -42,7 +42,7 @@ namespace NotPong
         public void Update(GameTime gameTime)
         {
             grid.Cast<Block>().ToList().ForEach(block => block.Update(gameTime));
-            Score.Add(CountNewDead());
+            Score?.Add(CountNewDead());
 
             if (IsReadyForMatch())
             {

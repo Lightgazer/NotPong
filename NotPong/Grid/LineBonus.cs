@@ -27,7 +27,7 @@ namespace NotPong
                     FireBlock(backwardIndex);
 
 
-                if (effectPosition / GameSettings.blockSize > stepsNeeded)
+                if (effectPosition / GameSettings.blockSize > stepsNeeded + 1)
                     Active = false;
             }
         }

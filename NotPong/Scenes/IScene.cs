@@ -7,6 +7,6 @@ namespace NotPong
     {
         public void Start() { }
         public void Update(GameTime gameTime);
-        public void Draw(GameTime gameTime, GraphicsDeviceManager graphics, SpriteBatch spriteBatch);
+        public void Draw(SpriteBatch spriteBatch);
     }
 }

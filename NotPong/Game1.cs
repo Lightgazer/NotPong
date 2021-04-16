@@ -56,12 +56,10 @@ namespace NotPong
             GraphicsDevice.Clear(Color.Black);
 
             spriteBatch.Begin();
-            SceneManager.CurrentScene.Draw(gameTime, graphics, spriteBatch);
+            SceneManager.CurrentScene.Draw(spriteBatch);
             spriteBatch.End();
 
             base.Draw(gameTime);
         }
     }
 }
-
-//System.Diagnostics.Debug.WriteLine(indexX.ToString() + " " + indexY.ToString());

@@ -1,9 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace NotPong.Scenes
 {
@@ -36,7 +33,6 @@ namespace NotPong.Scenes
             grid.Score = scoreView;
             //todo
             //time restriction
-            //score
         }
 
         public void Update(GameTime gameTime)
@@ -44,7 +40,7 @@ namespace NotPong.Scenes
             grid.Update(gameTime);
         }
 
-        public void Draw(GameTime gameTime, GraphicsDeviceManager graphics, SpriteBatch spriteBatch)
+        public void Draw(SpriteBatch spriteBatch)
         {
             grid.Draw(spriteBatch);
             scoreView.Draw(spriteBatch);
