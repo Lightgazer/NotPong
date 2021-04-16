@@ -1,16 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
+using System.Linq;
 
 namespace NotPong
 {
-    enum Direction
-    {
-        Up,
-        Down,
-        Left,
-        Rigth
-    }
-
     enum BlockState
     {
         ///<summary>Двигается, либо падение, либо свап</summary>
@@ -32,11 +26,12 @@ namespace NotPong
         public float Size { get; private set; } = 1;
         public Vector2 MovementDisplacement { get; private set; } = new Vector2(0, 0);
         public Bonus Bonus { get; set; }
+        public bool morgueTiket = false;
+        public bool crossingFlag = false;
 
         public static Vector2 origin = new Vector2(GameSettings.blockSize / 2);
         protected BlockState lastState;
         protected Texture2D texture;
-
 
         public Block(int type, Texture2D texture)
         {
@@ -44,9 +39,17 @@ namespace NotPong
             this.texture = texture;
         }
 
-        public void Fire()
+        public void FireBonus(Block[,] grid)
         {
+            var index = grid.Cast<Block>().ToList().FindIndex(block => block == this);
+            if(!IsBonusActive()) Bonus?.Activate(grid, (index / GameSettings.gridSize, index % GameSettings.gridSize));
+        }
 
+        public bool IsBonusActive()
+        {
+            if (Bonus is null)
+                return false;
+            return Bonus.Active;
         }
 
         public void MoveFrom(Vector2 direction)
@@ -63,7 +66,7 @@ namespace NotPong
             if (state == BlockState.Dead)
             {
                 Size = MyMath.MoveTowards(Size, 0.2f, (float)gameTime.ElapsedGameTime.TotalSeconds * GameSettings.animationSpeed);
-                if (Size == 0.2f) state = BlockState.Rotten;
+                if (Size == 0.2f && !IsBonusActive()) state = BlockState.Rotten;
             }
 
             if (state == BlockState.Moving)
@@ -74,13 +77,18 @@ namespace NotPong
                     state = lastState;
                 }
             }
+            Bonus?.Update(gameTime);
         }
 
         public void Draw(SpriteBatch spriteBatch, Vector2 position)
         {
-            position += origin;
-            position += MovementDisplacement;
+            position += origin + MovementDisplacement;
             spriteBatch.Draw(texture, position, null, Color.White, 0f, origin, Size, SpriteEffects.None, 0f);
+        }
+
+        public void DrawBonus(SpriteBatch spriteBatch, Vector2 position)
+        {
+            position += origin + MovementDisplacement;
             Bonus?.Draw(spriteBatch, position);
         }
     }

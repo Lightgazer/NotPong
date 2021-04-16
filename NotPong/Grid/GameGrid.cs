@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Linq;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using NotPong.Scenes;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace NotPong
 {
@@ -43,44 +42,22 @@ namespace NotPong
         public void Update(GameTime gameTime)
         {
             grid.Cast<Block>().ToList().ForEach(block => block.Update(gameTime));
+            Score.Add(CountNewDead());
 
             if (IsReadyForMatch())
             {
                 TriggerMatches();
                 ReturnBlocks();
-                Score.Add(CountDead());
             }
             if (IsReadyForDrop()) TriggerDrop();
-            if (IsIdle())
-            {
-                var option = GetCellClick();
-                if (option is Tuple<int, int> click)
-                {
-                    if (selectedIndex == null)
-                    {
-                        selectedIndex = click;
-                    }
-                    else
-                    {
-                        if (IsSwapAllowed(selectedIndex, click))
-                        {
-                            SwapBlocks(selectedIndex, click, BlockState.Suspect);
-                            selectedIndex = null;
-                        }
-                        else
-                        {
-                            selectedIndex = click;
-                        }
-                    }
-                }
-
-            }
+            if (IsIdle()) ManagePlayerInput();
         }
 
         public void Draw(SpriteBatch spriteBatch)
         {
             var padding = new Vector2(gridRectangle.Location.X, gridRectangle.Location.Y);
             DrawBlocks(spriteBatch, padding);
+            DrawBonuses(spriteBatch, padding);
             DrawFrame(spriteBatch, padding);
         }
 
@@ -108,10 +85,25 @@ namespace NotPong
             }
         }
 
+        private void DrawBonuses(SpriteBatch spriteBatch, Vector2 padding)
+        {
+            for (int indexX = 0; indexX < gridSize; indexX++)
+            {
+                for (int indexY = 0; indexY < gridSize; indexY++)
+                {
+                    var block = grid[indexX, indexY];
+                    var position = new Vector2((indexX * blockSize), (indexY * blockSize));
+                    position += padding;
+                    block.DrawBonus(spriteBatch, position);
+                }
+            }
+        }
+
         private void TriggerMatches()
         {
             TriggerMatches(true);
             TriggerMatches(false);
+            CleanCrossingFlags();
         }
 
         private void TriggerMatches(bool vertical)
@@ -122,46 +114,56 @@ namespace NotPong
                 List<Block> matchChain = new List<Block>();
                 for (int indexY = 0; indexY < gridSize; indexY++)
                 {
-                    var block = vertical ? grid[indexX, indexY] : grid[indexY, indexX];
+                    var block = vertical ? grid[indexY, indexX] : grid[indexX, indexY];
                     if (currentType == block.type)
                     {
                         matchChain.Add(block);
                     }
                     else
                     {
-                        KillBlocks(matchChain, vertical);
+                        ProcessChain(matchChain, vertical);
                         currentType = block.type;
                         matchChain.Clear();
                         matchChain.Add(block);
                     }
                 }
-                KillBlocks(matchChain, vertical);
+                ProcessChain(matchChain, vertical);
             }
         }
 
-        private void KillBlocks(List<Block> matchChain, bool vertical)
+        private void ProcessChain(List<Block> matchChain, bool vertical)
         {
             if (matchChain.Count < 3) return;
             matchChain.ForEach(block =>
             {
-                block.Fire();
-                if (block.state == BlockState.Suspect && matchChain.Count > 3)
+                block.FireBonus(grid);
+                if (block.crossingFlag)
+                {
+                    Score.Add(1);
+                    block.state = BlockState.Idle;
+                    block.Bonus = new BombBonus { BonusTexture = bombTexture };
+                }
+                else if (block.state == BlockState.Suspect && matchChain.Count > 3)
                 {
                     if (matchChain.Count > 4)
-                        block.Bonus = new Bonus { BonusTexture = bombTexture };
-                    else if (matchChain.Count > 3)
-                        block.Bonus = new Bonus { BonusTexture = lineTexture };
+                        block.Bonus = new BombBonus { BonusTexture = bombTexture };
+                    else
+                        block.Bonus = new LineBonus { BonusTexture = lineTexture, vertical = vertical };
+                    Score.Add(1);
                     block.state = BlockState.Idle;
                 }
                 else
                 {
-                    //здесь запуск бонуса
                     block.state = BlockState.Dead;
                 }
+                block.crossingFlag = true;
             });
         }
 
-
+        private void CleanCrossingFlags()
+        {
+            grid.Cast<Block>().ToList().ForEach(block => block.crossingFlag = false);
+        }
 
         private void TriggerDrop()
         {
@@ -245,9 +247,36 @@ namespace NotPong
             }
         }
 
-        private int CountDead()
+        private int CountNewDead()
         {
-            return grid.Cast<Block>().Where(block => block.state == BlockState.Dead).Count();
+            var newArrivals = grid.Cast<Block>().Where(block => block.state == BlockState.Dead).Where(block => !block.morgueTiket);
+            var ret = newArrivals.Count();
+            newArrivals.ToList().ForEach(block => block.morgueTiket = true);
+            return ret;
+        }
+
+        private void ManagePlayerInput()
+        {
+            var option = GetCellClick();
+            if (option is Tuple<int, int> click)
+            {
+                if (selectedIndex == null)
+                {
+                    selectedIndex = click;
+                }
+                else
+                {
+                    if (IsSwapAllowed(selectedIndex, click))
+                    {
+                        SwapBlocks(selectedIndex, click, BlockState.Suspect);
+                        selectedIndex = null;
+                    }
+                    else
+                    {
+                        selectedIndex = click;
+                    }
+                }
+            }
         }
 
         private Tuple<int, int> GetCellClick()
