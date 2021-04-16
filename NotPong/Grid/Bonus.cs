@@ -30,7 +30,7 @@ namespace NotPong
         {
             var length1 = grid.GetLength(0);
             var length2 = grid.GetLength(1);
-            if (index.Item1 > 0 && index.Item1 < length1 && index.Item2 > 0 && index.Item2 < length2)
+            if (index.Item1 >= 0 && index.Item1 < length1 && index.Item2 >= 0 && index.Item2 < length2)
                 return true;
             return false;
         }

@@ -21,7 +21,7 @@ namespace NotPong
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.DrawString(font, "Score " + score, position, Color.White);
+            spriteBatch.DrawString(font, "Score: " + score, position, Color.White);
         }
     }
 }
