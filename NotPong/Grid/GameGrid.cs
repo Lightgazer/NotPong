@@ -41,7 +41,7 @@ namespace NotPong
 
         public void Update(GameTime gameTime)
         {
-            grid.Cast<Block>().ToList().ForEach(block => block.Update(gameTime));
+            UpdateBlocks(gameTime);
             Score?.Add(CountNewDead());
 
             if (IsReadyForMatch())
@@ -189,6 +189,11 @@ namespace NotPong
 
             grid[x, 0] = CreateBlock();
             grid[x, 0].MoveFrom(new Vector2(0, -1));
+        }
+
+        private void UpdateBlocks(GameTime gameTime)
+        {
+            grid.Cast<Block>().ToList().ForEach(block => block.Update(gameTime));
         }
 
         private bool IsReadyForMatch()

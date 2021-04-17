@@ -25,7 +25,7 @@ namespace NotPong
 
         public void Update(GameTime gameTime)
         {
-            if (CheckClick()) this?.OnClick();
+            if (OnClick != null && CheckClick()) OnClick();
         }
 
         public void Draw(SpriteBatch spriteBatch)
