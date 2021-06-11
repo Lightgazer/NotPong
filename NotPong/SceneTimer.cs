@@ -18,7 +18,7 @@ namespace NotPong
         public void Update(GameTime gameTime)
         {
             timeLeft -= gameTime.ElapsedGameTime.TotalSeconds;
-            if (timeLeft < 0) SceneManager.LoadScene(2);
+            if (timeLeft < 0) SceneManager.LoadScene<EndScene>();
         }
 
         public void Draw(SpriteBatch spriteBatch)

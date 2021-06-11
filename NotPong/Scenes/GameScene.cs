@@ -2,7 +2,7 @@
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace NotPong.Scenes
+namespace NotPong
 {
     class GameScene : IScene
     {
@@ -18,7 +18,7 @@ namespace NotPong.Scenes
         private ScoreView scoreView;
         private SceneTimer timer;
 
-        public void Load(ContentManager content)
+        public GameScene(ContentManager content)
         {
             blockTextures = LoadBlockTextures(content);
             frameTexture = content.Load<Texture2D>("frame");

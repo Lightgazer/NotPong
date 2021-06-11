@@ -1,18 +1,19 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace NotPong.Scenes
+namespace NotPong
 {
-    //сделать родителя
     //добавить имя
     class MainMenuScene : IScene
     {
         private UIElement button;
 
-        public MainMenuScene(Texture2D buttonTexture, Vector2 center)
+        public MainMenuScene(ContentManager content)
         {
-            button = new UIElement(buttonTexture, center);
-            button.OnClick = ButtonOnClick;
+            var center = new Vector2(GameSettings.width / 2, GameSettings.height / 2);
+            var buttonTexture = content.Load<Texture2D>("buttons/play");
+            button = new UIElement(buttonTexture, center) { OnClick = ButtonOnClick };
         }
         public void Update(GameTime gameTime)
         {
@@ -26,7 +27,7 @@ namespace NotPong.Scenes
 
         public void ButtonOnClick()
         {
-            SceneManager.LoadScene(1);
+            SceneManager.LoadScene<GameScene>();
         }
     }
 }

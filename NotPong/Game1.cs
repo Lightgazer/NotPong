@@ -1,7 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using NotPong.Scenes;
 
 namespace NotPong
 {
@@ -30,15 +29,10 @@ namespace NotPong
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            var center = new Vector2(GameSettings.width / 2, GameSettings.height / 2);
-            var playTexture = Content.Load<Texture2D>("buttons/play");
-            var okTexture = Content.Load<Texture2D>("buttons/ok");
-            var gameOverTexture = Content.Load<Texture2D>("gameover");
-            var gameScene = new GameScene();
-            gameScene.Load(Content);
-            SceneManager.AddScene(new MainMenuScene(playTexture, center));
-            SceneManager.AddScene(gameScene);
-            SceneManager.AddScene(new EndScene(okTexture, gameOverTexture, center));
+            SceneManager.AddScene(new MainMenuScene(Content));
+            SceneManager.AddScene(new GameScene(Content));
+            SceneManager.AddScene(new EndScene(Content));
+            SceneManager.LoadScene<MainMenuScene>();
         }
 
         protected override void Update(GameTime gameTime)
@@ -46,7 +40,7 @@ namespace NotPong
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            SceneManager.CurrentScene.Update(gameTime);
+            SceneManager.Update(gameTime);
 
             base.Update(gameTime);
         }
@@ -56,7 +50,7 @@ namespace NotPong
             GraphicsDevice.Clear(Color.Black);
 
             spriteBatch.Begin();
-            SceneManager.CurrentScene.Draw(spriteBatch);
+            SceneManager.Draw(spriteBatch);
             spriteBatch.End();
 
             base.Draw(gameTime);
