@@ -18,12 +18,12 @@ namespace NotPong
         {
             var toVector = target - current;
 
-            float sqDist = toVector.X * toVector.X + toVector.Y * toVector.Y;
+            var sqDist = toVector.X * toVector.X + toVector.Y * toVector.Y;
 
-            if (sqDist == 0 || (maxDistanceDelta >= 0 && sqDist <= maxDistanceDelta * maxDistanceDelta))
+            if (MathF.Abs(sqDist) < float.Epsilon || (maxDistanceDelta >= 0 && sqDist <= maxDistanceDelta * maxDistanceDelta))
                 return target;
 
-            float dist = (float)Math.Sqrt(sqDist);
+            var dist = MathF.Sqrt(sqDist);
 
             return new Vector2(
                 current.X + toVector.X / dist * maxDistanceDelta,
