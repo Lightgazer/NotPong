@@ -13,16 +13,16 @@ namespace NotPong
             if (Active)
             {
                 effectPosition += (float)gameTime.ElapsedGameTime.TotalSeconds * GameSettings.blockSize * 4 * GameSettings.animationSpeed;
-                var stepsToStart = vertical ? index.Item1 : index.Item2;
+                var stepsToStart = vertical ? index.X : index.Y;
                 var stepsToEnd = GameSettings.gridSize - stepsToStart;
                 var stepsNeeded = stepsToStart > stepsToEnd ? stepsToStart : stepsToEnd;
 
-                int effectIndex = (int)(effectPosition / GameSettings.blockSize);
-                var fowardIndex = vertical ? (index.Item1 + effectIndex, index.Item2) : (index.Item1, index.Item2 + effectIndex);
+                var effectIndex = (int)(effectPosition / GameSettings.blockSize);
+                var fowardIndex = vertical ? new Point(index.X + effectIndex, index.Y) : new Point(index.X, index.Y + effectIndex);
                 if (IsIndexInBounds(fowardIndex))
                     FireBlock(fowardIndex);
 
-                var backwardIndex = vertical ? (index.Item1 - effectIndex, index.Item2) : (index.Item1, index.Item2 - effectIndex);
+                var backwardIndex = vertical ? new Point (index.X - effectIndex, index.Y) : new Point (index.X, index.Y - effectIndex);
                 if (IsIndexInBounds(backwardIndex))
                     FireBlock(backwardIndex);
 

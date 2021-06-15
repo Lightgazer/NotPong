@@ -15,14 +15,14 @@ namespace NotPong
         private static int blockSize = GameSettings.blockSize;
         private static readonly Random random = new Random();
 
-        private Texture2D[] blockTextures;
-        private Texture2D frameTexture;
-        private Texture2D lineTexture;
-        private Texture2D bombTexture;
+        private readonly Texture2D[] blockTextures;
+        private readonly Texture2D frameTexture;
+        private readonly Texture2D lineTexture;
+        private readonly Texture2D bombTexture;
         private Block[,] grid = new Block[gridSize, gridSize];
         private MouseState lastMouseState;
         private Rectangle gridRectangle;
-        private Tuple<int, int> selectedIndex;
+        private Point? selectedIndex;
 
         public GameGrid(Texture2D[] blockTextures, Texture2D frameTexture, Texture2D lineTexture, Texture2D bombTexture)
         {
@@ -62,9 +62,9 @@ namespace NotPong
 
         private void DrawFrame(SpriteBatch spriteBatch, Vector2 padding)
         {
-            if (selectedIndex != null)
+            if (selectedIndex is Point pointIndex)
             {
-                var position = new Vector2(selectedIndex.Item1 * blockSize, selectedIndex.Item2 * blockSize);
+                var position = new Vector2(pointIndex.X * blockSize, pointIndex.Y * blockSize);
                 position += padding;
                 spriteBatch.Draw(frameTexture, position, Color.White);
             }
@@ -211,26 +211,26 @@ namespace NotPong
                 && grid.Cast<Block>().All(block => block.state != BlockState.Moving);
         }
 
-        private bool IsSwapAllowed(Tuple<int, int> first, Tuple<int, int> second)
+        private bool IsSwapAllowed(Point first, Point second)
         {
-            if (first.Item1 == second.Item1)
-                return Math.Abs(first.Item2 - second.Item2) == 1;
-            else if (first.Item2 == second.Item2)
-                return Math.Abs(first.Item1 - second.Item1) == 1;
+            if (first.X == second.X)
+                return Math.Abs(first.Y - second.Y) == 1;
+            else if (first.Y == second.Y)
+                return Math.Abs(first.X - second.X) == 1;
             return false;
         }
 
-        private void SwapBlocks(Tuple<int, int> first, Tuple<int, int> second, BlockState setState)
+        private void SwapBlocks(Point first, Point second, BlockState setState)
         {
-            var movementDirection = new Vector2(first.Item1 - second.Item1, first.Item2 - second.Item2);
-            var firstBlock = grid[first.Item1, first.Item2];
-            var secondBlock = grid[second.Item1, second.Item2];
+            var movementDirection = (first - second).ToVector2();
+            var firstBlock = grid[first.X, first.Y];
+            var secondBlock = grid[second.X, second.Y];
             firstBlock.state = setState;
             secondBlock.state = setState;
             firstBlock.MoveFrom(movementDirection);
             secondBlock.MoveFrom(-movementDirection);
-            grid[second.Item1, second.Item2] = firstBlock;
-            grid[first.Item1, first.Item2] = secondBlock;
+            grid[second.X, second.Y] = firstBlock;
+            grid[first.X, first.Y] = secondBlock;
         }
 
         private void ReturnBlocks()
@@ -238,15 +238,17 @@ namespace NotPong
             var firstIndex = grid.Cast<Block>().ToList().FindIndex(block => block.state == BlockState.Suspect);
             var secondIndex = grid.Cast<Block>().ToList().FindLastIndex(block => block.state == BlockState.Suspect);
             if (firstIndex == -1)
+            {
                 return;
+            }
             else if (firstIndex == secondIndex)
             {
                 grid[firstIndex / gridSize, firstIndex % gridSize].state = BlockState.Idle;
             }
             else
             {
-                var first = new Tuple<int, int>(firstIndex / gridSize, firstIndex % gridSize);
-                var second = new Tuple<int, int>(secondIndex / gridSize, secondIndex % gridSize);
+                var first = new Point(firstIndex / gridSize, firstIndex % gridSize);
+                var second = new Point(secondIndex / gridSize, secondIndex % gridSize);
                 SwapBlocks(first, second, BlockState.Idle);
             }
         }
@@ -262,17 +264,13 @@ namespace NotPong
         private void ManagePlayerInput()
         {
             var option = GetCellClick();
-            if (option is Tuple<int, int> click)
+            if (option is Point click)
             {
-                if (selectedIndex == null)
+                if(selectedIndex is Point pointIndex)
                 {
-                    selectedIndex = click;
-                }
-                else
-                {
-                    if (IsSwapAllowed(selectedIndex, click))
+                    if (IsSwapAllowed(pointIndex, click))
                     {
-                        SwapBlocks(selectedIndex, click, BlockState.Suspect);
+                        SwapBlocks(pointIndex, click, BlockState.Suspect);
                         selectedIndex = null;
                     }
                     else
@@ -280,19 +278,23 @@ namespace NotPong
                         selectedIndex = click;
                     }
                 }
+                else
+                {
+                    selectedIndex = click;
+                }
             }
         }
 
-        private Tuple<int, int> GetCellClick()
+        private Point? GetCellClick()
         {
             var mouseState = Mouse.GetState();
-            Tuple<int, int> option = null; //😢😢😢 хочу Option<T> из языка rust 
+            Point? option = null; //😢😢😢 хочу Option<T> из языка rust 
             if (lastMouseState.LeftButton == ButtonState.Released &&
                 mouseState.LeftButton == ButtonState.Pressed &&
                 gridRectangle.Contains(mouseState.Position))
             {
                 var positionOnGrid = mouseState.Position - gridRectangle.Location;
-                option = new Tuple<int, int>(positionOnGrid.X / blockSize, positionOnGrid.Y / blockSize);
+                option = new Point(positionOnGrid.X / blockSize, positionOnGrid.Y / blockSize);
             }
 
             lastMouseState = mouseState;

@@ -42,7 +42,7 @@ namespace NotPong
         public void FireBonus(Block[,] grid)
         {
             var index = grid.Cast<Block>().ToList().FindIndex(block => block == this);
-            if(!IsBonusActive()) Bonus?.Activate(grid, (index / GameSettings.gridSize, index % GameSettings.gridSize));
+            if(!IsBonusActive()) Bonus?.Activate(grid, new Point(index / GameSettings.gridSize, index % GameSettings.gridSize));
         }
 
         public bool IsBonusActive()

@@ -20,7 +20,7 @@ namespace NotPong
                     {
                         for (int y = -1; y <= 1; y++)
                         {
-                            var doomIndex = (index.Item1 + x, index.Item2 + y);
+                            var doomIndex = new Point(index.X + x, index.Y + y);
                             if (IsIndexInBounds(doomIndex))
                                 FireBlock(doomIndex);
                         }
@@ -31,11 +31,6 @@ namespace NotPong
         public override void Draw(SpriteBatch spriteBatch, Vector2 position)
         {
             spriteBatch.Draw(BonusTexture, position, null, Color.White, 0f, Block.origin, 1, SpriteEffects.None, 0f);
-            if (Active) DrawEffect(spriteBatch, position);
-        }
-
-        private void DrawEffect(SpriteBatch spriteBatch, Vector2 position)
-        {
         }
     }
 }
