@@ -8,14 +8,14 @@ namespace NotPong
     {
         public static int numberOfBlockTypes = 5;
 
-        private Texture2D[] blockTextures;
-        private Texture2D frameTexture;
-        private Texture2D bombTexture;
-        private Texture2D lineTexture;
-        private SpriteFont font;
+        private readonly Texture2D[] blockTextures;
+        private readonly Texture2D frameTexture;
+        private readonly Texture2D bombTexture;
+        private readonly Texture2D lineTexture;
+        private readonly SpriteFont font;
 
         private GameGrid grid;
-        private ScoreView scoreView;
+        private ScoreWidget scoreView;
         private SceneTimer timer;
 
         public GameScene(ContentManager content)
@@ -30,7 +30,7 @@ namespace NotPong
         public void Start()
         {
             grid = new GameGrid(blockTextures, frameTexture, lineTexture, bombTexture);
-            scoreView = new ScoreView(font);
+            scoreView = new ScoreWidget(font);
             grid.Score = scoreView;
             timer = new SceneTimer(font, 60d);
         }

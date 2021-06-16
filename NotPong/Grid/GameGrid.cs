@@ -9,7 +9,7 @@ namespace NotPong
 {
     class GameGrid
     {
-        public IScore Score { private get; set; }
+        public ScoreWidget Score { private get; set; }
 
         private static int gridSize = GameSettings.gridSize;
         private static int blockSize = GameSettings.blockSize;
@@ -288,7 +288,7 @@ namespace NotPong
         private Point? GetCellClick()
         {
             var mouseState = Mouse.GetState();
-            Point? option = null; //😢😢😢 хочу Option<T> из языка rust 
+            Point? option = null;
             if (lastMouseState.LeftButton == ButtonState.Released &&
                 mouseState.LeftButton == ButtonState.Pressed &&
                 gridRectangle.Contains(mouseState.Position))
