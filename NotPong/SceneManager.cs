@@ -5,26 +5,26 @@ using System.Linq;
 
 namespace NotPong
 {
-    static class SceneManager
+    internal static class SceneManager
     {
         public static IScene CurrentScene { get; private set; }
 
-        private static List<IScene> scenes = new List<IScene>();
+        private static readonly List<IScene> Scenes = new List<IScene>();
 
         public static void AddScene(IScene scene)
         {
-            scenes.Add(scene);
+            Scenes.Add(scene);
         }
 
         public static void LoadScene<T>()
         {
-            var index = scenes.FindIndex(scene => scene is T);
+            var index = Scenes.FindIndex(scene => scene is T);
             LoadScene(index);
         }
 
         public static void LoadScene(int index)
         {
-            if (scenes.ElementAtOrDefault(index) is IScene scene)
+            if (Scenes.ElementAtOrDefault(index) is { } scene)
             {
                 CurrentScene = scene;
                 CurrentScene.Start();

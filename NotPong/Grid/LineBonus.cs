@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace NotPong
 {
-    class LineBonus : Bonus
+    internal class LineBonus : Bonus
     {
         public bool vertical;
         private float effectPosition = 0;
@@ -12,22 +12,22 @@ namespace NotPong
         {
             if (Active)
             {
-                effectPosition += (float)gameTime.ElapsedGameTime.TotalSeconds * GameSettings.blockSize * 4 * GameSettings.animationSpeed;
+                effectPosition += (float)gameTime.ElapsedGameTime.TotalSeconds * GameSettings.BlockSize * 4 * GameSettings.AnimationSpeed;
                 var stepsToStart = vertical ? index.X : index.Y;
-                var stepsToEnd = GameSettings.gridSize - stepsToStart;
+                var stepsToEnd = GameSettings.GridSize - stepsToStart;
                 var stepsNeeded = stepsToStart > stepsToEnd ? stepsToStart : stepsToEnd;
 
-                var effectIndex = (int)(effectPosition / GameSettings.blockSize);
-                var fowardIndex = vertical ? new Point(index.X + effectIndex, index.Y) : new Point(index.X, index.Y + effectIndex);
-                if (IsIndexInBounds(fowardIndex))
-                    FireBlock(fowardIndex);
+                var effectIndex = (int)(effectPosition / GameSettings.BlockSize);
+                var forwardIndex = vertical ? new Point(index.X + effectIndex, index.Y) : new Point(index.X, index.Y + effectIndex);
+                if (IsIndexInBounds(forwardIndex))
+                    FireBlock(forwardIndex);
 
                 var backwardIndex = vertical ? new Point (index.X - effectIndex, index.Y) : new Point (index.X, index.Y - effectIndex);
                 if (IsIndexInBounds(backwardIndex))
                     FireBlock(backwardIndex);
 
 
-                if (effectPosition / GameSettings.blockSize > stepsNeeded)
+                if (effectPosition / GameSettings.BlockSize > stepsNeeded)
                     Active = false;
             }
         }

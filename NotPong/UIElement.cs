@@ -5,13 +5,12 @@ using System;
 
 namespace NotPong
 {
-    class UIElement
+    internal class UIElement
     {
-        public Action OnClick;
+        public Action onClick;
 
-        protected Texture2D texture;
-        protected Rectangle rectangle;
-
+        private Texture2D texture;
+        private Rectangle rectangle;
         private MouseState lastMouseState;
 
         public UIElement(Texture2D texture, Vector2 position)
@@ -19,13 +18,13 @@ namespace NotPong
             this.texture = texture;
             var size = new Vector2(texture.Width, texture.Height);
             var vector = position - size / 2;
-            this.rectangle = new Rectangle(vector.ToPoint(), size.ToPoint());
+            rectangle = new Rectangle(vector.ToPoint(), size.ToPoint());
             lastMouseState = Mouse.GetState();
         }
 
         public void Update(GameTime gameTime)
         {
-            if (OnClick != null && CheckClick()) OnClick();
+            if (onClick != null && CheckClick()) onClick();
         }
 
         public void Draw(SpriteBatch spriteBatch)

@@ -4,16 +4,15 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace NotPong
 {
-    //добавить имя
-    class MainMenuScene : IScene
+    internal class MainMenuScene : IScene
     {
-        private UIElement button;
+        private readonly UIElement button;
 
         public MainMenuScene(ContentManager content)
         {
-            var center = new Vector2(GameSettings.width / 2, GameSettings.height / 2);
+            var center = new Vector2(GameSettings.Width / 2, GameSettings.Height / 2);
             var buttonTexture = content.Load<Texture2D>("buttons/play");
-            button = new UIElement(buttonTexture, center) { OnClick = ButtonOnClick };
+            button = new UIElement(buttonTexture, center) { onClick = ButtonOnClick };
         }
         public void Update(GameTime gameTime)
         {
@@ -25,7 +24,7 @@ namespace NotPong
             button.Draw(spriteBatch);
         }
 
-        public void ButtonOnClick()
+        private void ButtonOnClick()
         {
             SceneManager.LoadScene<GameScene>();
         }

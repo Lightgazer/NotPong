@@ -3,10 +3,10 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace NotPong
 {
-    class SceneTimer
+    internal class SceneTimer
     {
-        private Vector2 position = new Vector2(GameSettings.width * 0.6f, 10);
-        private SpriteFont font;
+        private readonly Vector2 position = new Vector2(GameSettings.Width * 0.6f, 10);
+        private readonly SpriteFont font;
         private double timeLeft;
 
         public SceneTimer(SpriteFont font, double seconds)

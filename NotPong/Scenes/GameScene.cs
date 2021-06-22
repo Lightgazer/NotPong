@@ -4,9 +4,9 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace NotPong
 {
-    class GameScene : IScene
+    internal class GameScene : IScene
     {
-        public static int numberOfBlockTypes = 5;
+        public const int NumberOfBlockTypes = 5;
 
         private readonly Texture2D[] blockTextures;
         private readonly Texture2D frameTexture;
@@ -50,8 +50,8 @@ namespace NotPong
 
         private static Texture2D[] LoadBlockTextures(ContentManager content)
         {
-            var textures = new Texture2D[numberOfBlockTypes];
-            for (int index = 0; index < numberOfBlockTypes; index++)
+            var textures = new Texture2D[NumberOfBlockTypes];
+            for (var index = 0; index < NumberOfBlockTypes; index++)
             {
                 textures[index] = content.Load<Texture2D>("blocks/block" + index.ToString());
             }

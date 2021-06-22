@@ -3,11 +3,11 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace NotPong
 {
-    class ScoreWidget
+    internal class ScoreWidget
     {
-        private readonly Vector2 position = new Vector2((GameSettings.width - GameSettings.gridSize * GameSettings.blockSize) / 2, 10);
-        private int score = 0;
+        private readonly Vector2 position = new Vector2((GameSettings.Width - GameSettings.GridSize * GameSettings.BlockSize) / 2, 10);
         private readonly SpriteFont font;
+        private int score = 0;
 
         public ScoreWidget(SpriteFont font)
         {

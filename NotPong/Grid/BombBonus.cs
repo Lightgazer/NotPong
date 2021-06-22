@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace NotPong
 {
-    class BombBonus : Bonus
+    internal class BombBonus : Bonus
     {
         private double detonateTime = 250;
 
@@ -16,9 +16,9 @@ namespace NotPong
                 {
                     Active = false;
 
-                    for (int x = -1; x <= 1; x++)
+                    for (var x = -1; x <= 1; x++)
                     {
-                        for (int y = -1; y <= 1; y++)
+                        for (var y = -1; y <= 1; y++)
                         {
                             var doomIndex = new Point(index.X + x, index.Y + y);
                             if (IsIndexInBounds(doomIndex))

@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace NotPong
 {
-    enum BlockState
+    internal enum BlockState
     {
         ///<summary>Двигается, либо падение, либо свап</summary>
         Moving,
@@ -19,19 +19,19 @@ namespace NotPong
         Idle
     }
 
-    class Block
+    internal class Block
     {
-        public int type;
+        public readonly int type;
         public BlockState state = BlockState.Idle;
-        public float Size { get; private set; } = 1;
-        public Vector2 MovementDisplacement { get; private set; } = new Vector2(0, 0);
         public Bonus Bonus { get; set; }
+        private float Size { get; set; } = 1;
+        private Vector2 MovementDisplacement { get; set; } = new Vector2(0, 0);
         public bool morgueTiket = false;
         public bool crossingFlag = false;
+        public static Vector2 origin = new Vector2(GameSettings.BlockSize / 2);
 
-        public static Vector2 origin = new Vector2(GameSettings.blockSize / 2);
-        protected BlockState lastState;
-        protected Texture2D texture;
+        private readonly Texture2D texture;
+        private BlockState lastState;
 
         public Block(int type, Texture2D texture)
         {
@@ -42,7 +42,7 @@ namespace NotPong
         public void FireBonus(Block[,] grid)
         {
             var index = grid.Cast<Block>().ToList().FindIndex(block => block == this);
-            if(!IsBonusActive()) Bonus?.Activate(grid, new Point(index / GameSettings.gridSize, index % GameSettings.gridSize));
+            if(!IsBonusActive()) Bonus?.Activate(grid, new Point(index / GameSettings.GridSize, index % GameSettings.GridSize));
         }
 
         public bool IsBonusActive()
@@ -56,7 +56,7 @@ namespace NotPong
         {
             if (state == BlockState.Moving) return;
             direction.Normalize();
-            MovementDisplacement = direction * GameSettings.blockSize;
+            MovementDisplacement = direction * GameSettings.BlockSize;
             lastState = state;
             state = BlockState.Moving;
         }
@@ -65,13 +65,14 @@ namespace NotPong
         {
             if (state == BlockState.Dead)
             {
-                Size = MyMath.MoveTowards(Size, 0.2f, (float)gameTime.ElapsedGameTime.TotalSeconds * GameSettings.animationSpeed);
-                if (Size == 0.2f && !IsBonusActive()) state = BlockState.Rotten;
+                Size = MyMath.MoveTowards(Size, 0.2f, (float)gameTime.ElapsedGameTime.TotalSeconds * GameSettings.AnimationSpeed);
+                if (Math.Abs(Size - 0.2f) < float.Epsilon && !IsBonusActive()) 
+                    state = BlockState.Rotten;
             }
 
             if (state == BlockState.Moving)
             {
-                MovementDisplacement = MyMath.MoveTowards(MovementDisplacement, new Vector2(0), (float)gameTime.ElapsedGameTime.TotalSeconds * GameSettings.blockSize * 2 * GameSettings.animationSpeed);
+                MovementDisplacement = MyMath.MoveTowards(MovementDisplacement, new Vector2(0), (float)gameTime.ElapsedGameTime.TotalSeconds * GameSettings.BlockSize * 2 * GameSettings.AnimationSpeed);
                 if (MovementDisplacement == new Vector2(0))
                 {
                     state = lastState;

@@ -6,7 +6,7 @@ namespace NotPong
 {
     public class Game1 : Game
     {
-        private GraphicsDeviceManager graphics;
+        private readonly GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
 
         public Game1()
@@ -18,8 +18,8 @@ namespace NotPong
 
         protected override void Initialize()
         {
-            graphics.PreferredBackBufferHeight = GameSettings.height;
-            graphics.PreferredBackBufferWidth = GameSettings.width;
+            graphics.PreferredBackBufferHeight = GameSettings.Height;
+            graphics.PreferredBackBufferWidth = GameSettings.Width;
             graphics.ApplyChanges();
 
             base.Initialize();

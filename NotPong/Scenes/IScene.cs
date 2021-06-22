@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace NotPong
 {
-    interface IScene
+    internal interface IScene
     {
         public void Start() { }
         public void Update(GameTime gameTime);

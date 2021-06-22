@@ -7,19 +7,19 @@ using System.Linq;
 
 namespace NotPong
 {
-    class GameGrid
+    internal class GameGrid
     {
         public ScoreWidget Score { private get; set; }
 
-        private static int gridSize = GameSettings.gridSize;
-        private static int blockSize = GameSettings.blockSize;
-        private static readonly Random random = new Random();
+        private static int gridSize = GameSettings.GridSize;
+        private static int blockSize = GameSettings.BlockSize;
+        private static readonly Random Random = new Random();
 
         private readonly Texture2D[] blockTextures;
         private readonly Texture2D frameTexture;
         private readonly Texture2D lineTexture;
         private readonly Texture2D bombTexture;
-        private Block[,] grid = new Block[gridSize, gridSize];
+        private readonly Block[,] grid = new Block[gridSize, gridSize];
         private MouseState lastMouseState;
         private Rectangle gridRectangle;
         private Point? selectedIndex;
@@ -33,7 +33,7 @@ namespace NotPong
             PopulateGrid();
 
             gridRectangle = new Rectangle(
-                new Point((GameSettings.width - gridSize * blockSize) / 2, (GameSettings.height - gridSize * blockSize) / 2),
+                new Point((GameSettings.Width - gridSize * blockSize) / 2, (GameSettings.Height - gridSize * blockSize) / 2),
                 new Point(gridSize * blockSize, gridSize * blockSize)
             );
         }
@@ -62,7 +62,7 @@ namespace NotPong
 
         private void DrawFrame(SpriteBatch spriteBatch, Vector2 padding)
         {
-            if (selectedIndex is Point pointIndex)
+            if (selectedIndex is { } pointIndex)
             {
                 var position = new Vector2(pointIndex.X * blockSize, pointIndex.Y * blockSize);
                 position += padding;
@@ -72,9 +72,9 @@ namespace NotPong
 
         private void DrawBlocks(SpriteBatch spriteBatch, Vector2 padding)
         {
-            for (int indexX = 0; indexX < gridSize; indexX++)
+            for (var indexX = 0; indexX < gridSize; indexX++)
             {
-                for (int indexY = 0; indexY < gridSize; indexY++)
+                for (var indexY = 0; indexY < gridSize; indexY++)
                 {
                     var block = grid[indexX, indexY];
                     var position = new Vector2((indexX * blockSize), (indexY * blockSize));
@@ -86,9 +86,9 @@ namespace NotPong
 
         private void DrawBonuses(SpriteBatch spriteBatch, Vector2 padding)
         {
-            for (int indexX = 0; indexX < gridSize; indexX++)
+            for (var indexX = 0; indexX < gridSize; indexX++)
             {
-                for (int indexY = 0; indexY < gridSize; indexY++)
+                for (var indexY = 0; indexY < gridSize; indexY++)
                 {
                     var block = grid[indexX, indexY];
                     var position = new Vector2((indexX * blockSize), (indexY * blockSize));
@@ -107,11 +107,11 @@ namespace NotPong
 
         private void TriggerMatches(bool vertical)
         {
-            for (int indexX = 0; indexX < gridSize; indexX++)
+            for (var indexX = 0; indexX < gridSize; indexX++)
             {
-                int currentType = -1;
-                List<Block> matchChain = new List<Block>();
-                for (int indexY = 0; indexY < gridSize; indexY++)
+                var currentType = -1;
+                var matchChain = new List<Block>();
+                for (var indexY = 0; indexY < gridSize; indexY++)
                 {
                     var block = vertical ? grid[indexY, indexX] : grid[indexX, indexY];
                     if (currentType == block.type)
@@ -166,9 +166,9 @@ namespace NotPong
 
         private void TriggerDrop()
         {
-            for (int indexY = gridSize - 1; indexY >= 0; indexY--)
+            for (var indexY = gridSize - 1; indexY >= 0; indexY--)
             {
-                for (int indexX = 0; indexX < gridSize; indexX++)
+                for (var indexX = 0; indexX < gridSize; indexX++)
                 {
                     var block = grid[indexX, indexY];
                     if (block.state == BlockState.Rotten)
@@ -215,7 +215,7 @@ namespace NotPong
         {
             if (first.X == second.X)
                 return Math.Abs(first.Y - second.Y) == 1;
-            else if (first.Y == second.Y)
+            if (first.Y == second.Y)
                 return Math.Abs(first.X - second.X) == 1;
             return false;
         }
@@ -237,11 +237,10 @@ namespace NotPong
         {
             var firstIndex = grid.Cast<Block>().ToList().FindIndex(block => block.state == BlockState.Suspect);
             var secondIndex = grid.Cast<Block>().ToList().FindLastIndex(block => block.state == BlockState.Suspect);
-            if (firstIndex == -1)
-            {
+            if (firstIndex == -1) 
                 return;
-            }
-            else if (firstIndex == secondIndex)
+            
+            if (firstIndex == secondIndex)
             {
                 grid[firstIndex / gridSize, firstIndex % gridSize].state = BlockState.Idle;
             }
@@ -255,18 +254,21 @@ namespace NotPong
 
         private int CountNewDead()
         {
-            var newArrivals = grid.Cast<Block>().Where(block => block.state == BlockState.Dead).Where(block => !block.morgueTiket);
+            var newArrivals = grid.Cast<Block>()
+                .Where(block => block.state == BlockState.Dead)
+                .Where(block => !block.morgueTiket)
+                .ToList();
             var ret = newArrivals.Count();
-            newArrivals.ToList().ForEach(block => block.morgueTiket = true);
+            newArrivals.ForEach(block => block.morgueTiket = true);
             return ret;
         }
 
         private void ManagePlayerInput()
         {
             var option = GetCellClick();
-            if (option is Point click)
+            if (option is { } click)
             {
-                if(selectedIndex is Point pointIndex)
+                if(selectedIndex is { } pointIndex)
                 {
                     if (IsSwapAllowed(pointIndex, click))
                     {
@@ -293,8 +295,8 @@ namespace NotPong
                 mouseState.LeftButton == ButtonState.Pressed &&
                 gridRectangle.Contains(mouseState.Position))
             {
-                var positionOnGrid = mouseState.Position - gridRectangle.Location;
-                option = new Point(positionOnGrid.X / blockSize, positionOnGrid.Y / blockSize);
+                var (x, y) = mouseState.Position - gridRectangle.Location;
+                option = new Point(x / blockSize, y / blockSize);
             }
 
             lastMouseState = mouseState;
@@ -303,14 +305,14 @@ namespace NotPong
 
         private void PopulateGrid()
         {
-            for (int indexX = 0; indexX < gridSize; indexX++)
-                for (int indexY = 0; indexY < gridSize; indexY++)
+            for (var indexX = 0; indexX < gridSize; indexX++)
+                for (var indexY = 0; indexY < gridSize; indexY++)
                     grid[indexX, indexY] = CreateBlock();
         }
 
         private Block CreateBlock()
         {
-            var type = random.Next(GameScene.numberOfBlockTypes);
+            var type = Random.Next(GameScene.NumberOfBlockTypes);
             var block = new Block(type, blockTextures[type]);
             return block;
         }

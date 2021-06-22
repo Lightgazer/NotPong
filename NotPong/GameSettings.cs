@@ -1,11 +1,11 @@
 ﻿namespace NotPong
 {
-    static class GameSettings
+    internal static class GameSettings
     {
-        public static readonly int width = 800;
-        public static readonly int height = 600;
-        public static readonly float animationSpeed = 3;
-        public static readonly int blockSize = 64;
-        public static readonly int gridSize = 8;
+        public const int Width = 800;
+        public const int Height = 600;
+        public const float AnimationSpeed = 3;
+        public const int BlockSize = 64;
+        public const int GridSize = 8;
     }
 }

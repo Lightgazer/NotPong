@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework;
 
 namespace NotPong
 {
-    static class MyMath
+    internal static class MyMath
     {
         public static float MoveTowards(float current, float target, float maxDelta)
         {
