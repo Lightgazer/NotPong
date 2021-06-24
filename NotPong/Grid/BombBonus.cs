@@ -30,7 +30,7 @@ namespace NotPong
         }
         public override void Draw(SpriteBatch spriteBatch, Vector2 position)
         {
-            spriteBatch.Draw(BonusTexture, position, null, Color.White, 0f, Block.origin, 1, SpriteEffects.None, 0f);
+            spriteBatch.Draw(Texture, position, null, Color.White, 0f, Block.origin, 1, SpriteEffects.None, 0f);
         }
     }
 }

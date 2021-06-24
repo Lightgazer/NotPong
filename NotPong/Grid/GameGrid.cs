@@ -33,7 +33,8 @@ namespace NotPong
             PopulateGrid();
 
             gridRectangle = new Rectangle(
-                new Point((GameSettings.Width - gridSize * blockSize) / 2, (GameSettings.Height - gridSize * blockSize) / 2),
+                new Point((GameSettings.Width - gridSize * blockSize) / 2,
+                    (GameSettings.Height - gridSize * blockSize) / 2),
                 new Point(gridSize * blockSize, gridSize * blockSize)
             );
         }
@@ -46,8 +47,9 @@ namespace NotPong
             if (IsReadyForMatch())
             {
                 TriggerMatches();
-                ReturnBlocks();
+                ReleaseSuspects();
             }
+
             if (IsReadyForDrop()) TriggerDrop();
             if (IsIdle()) ManagePlayerInput();
         }
@@ -126,6 +128,7 @@ namespace NotPong
                         matchChain.Add(block);
                     }
                 }
+
                 ProcessChain(matchChain, vertical);
             }
         }
@@ -135,19 +138,19 @@ namespace NotPong
             if (matchChain.Count < 3) return;
             matchChain.ForEach(block =>
             {
-                block.FireBonus(grid);
+                block.ActivateBonus(grid);
                 if (block.crossingFlag)
                 {
                     Score.Add(1);
                     block.state = BlockState.Idle;
-                    block.Bonus = new BombBonus { BonusTexture = bombTexture };
+                    block.Bonus = new BombBonus {Texture = bombTexture};
                 }
                 else if (block.state == BlockState.Suspect && matchChain.Count > 3)
                 {
                     if (matchChain.Count > 4)
-                        block.Bonus = new BombBonus { BonusTexture = bombTexture };
+                        block.Bonus = new BombBonus {Texture = bombTexture};
                     else
-                        block.Bonus = new LineBonus { BonusTexture = lineTexture, vertical = vertical };
+                        block.Bonus = new LineBonus {Texture = lineTexture, vertical = vertical};
                     Score.Add(1);
                     block.state = BlockState.Idle;
                 }
@@ -155,30 +158,27 @@ namespace NotPong
                 {
                     block.state = BlockState.Dead;
                 }
+
                 block.crossingFlag = true;
             });
         }
 
         private void CleanCrossingFlags()
         {
-            grid.Cast<Block>().ToList().ForEach(block => block.crossingFlag = false);
+            grid.ForEach(block => block.crossingFlag = false);
         }
 
         private void TriggerDrop()
         {
-            for (var indexY = gridSize - 1; indexY >= 0; indexY--)
+            grid.ForEach((block, point) =>
             {
-                for (var indexX = 0; indexX < gridSize; indexX++)
-                {
-                    var block = grid[indexX, indexY];
-                    if (block.state == BlockState.Rotten)
-                        MarkDrop(indexX, indexY);
-                }
-            }
+                if (block.state == BlockState.Rotten) MarkDrop(point);
+            });
         }
 
-        private void MarkDrop(int x, int y)
+        private void MarkDrop(Point point)
         {
+            var (x, y) = point;
             while (y > 0)
             {
                 grid[x, y] = grid[x, y - 1];
@@ -192,7 +192,7 @@ namespace NotPong
 
         private void UpdateBlocks(GameTime gameTime)
         {
-            grid.Cast<Block>().ToList().ForEach(block => block.Update(gameTime));
+            grid.ForEach(block => block.Update(gameTime));
         }
 
         private bool IsReadyForMatch()
@@ -233,23 +233,14 @@ namespace NotPong
             grid[first.X, first.Y] = secondBlock;
         }
 
-        private void ReturnBlocks()
+        private void ReleaseSuspects()
         {
-            var firstIndex = grid.Cast<Block>().ToList().FindIndex(block => block.state == BlockState.Suspect);
-            var secondIndex = grid.Cast<Block>().ToList().FindLastIndex(block => block.state == BlockState.Suspect);
-            if (firstIndex == -1) 
-                return;
-            
-            if (firstIndex == secondIndex)
-            {
-                grid[firstIndex / gridSize, firstIndex % gridSize].state = BlockState.Idle;
-            }
-            else
-            {
-                var first = new Point(firstIndex / gridSize, firstIndex % gridSize);
-                var second = new Point(secondIndex / gridSize, secondIndex % gridSize);
-                SwapBlocks(first, second, BlockState.Idle);
-            }
+            var indices = grid.FindAllIndexOf(block => block.state == BlockState.Suspect);
+
+            if (indices.Count == 2)
+                SwapBlocks(indices[0], indices[1], BlockState.Idle);
+            if (indices.Count == 1)
+                grid[indices[0].X, indices[0].Y].state = BlockState.Idle;
         }
 
         private int CountNewDead()
@@ -265,25 +256,18 @@ namespace NotPong
 
         private void ManagePlayerInput()
         {
-            var option = GetCellClick();
-            if (option is { } click)
+            if (GetCellClick() is { } click)
             {
-                if(selectedIndex is { } pointIndex)
+                if (selectedIndex is { } pointIndex)
                 {
                     if (IsSwapAllowed(pointIndex, click))
                     {
                         SwapBlocks(pointIndex, click, BlockState.Suspect);
                         selectedIndex = null;
-                    }
-                    else
-                    {
-                        selectedIndex = click;
+                        return;
                     }
                 }
-                else
-                {
-                    selectedIndex = click;
-                }
+                selectedIndex = click;
             }
         }
 
@@ -295,8 +279,7 @@ namespace NotPong
                 mouseState.LeftButton == ButtonState.Pressed &&
                 gridRectangle.Contains(mouseState.Position))
             {
-                var (x, y) = mouseState.Position - gridRectangle.Location;
-                option = new Point(x / blockSize, y / blockSize);
+                option = (mouseState.Position - gridRectangle.Location) / new Point(blockSize);
             }
 
             lastMouseState = mouseState;
@@ -305,9 +288,7 @@ namespace NotPong
 
         private void PopulateGrid()
         {
-            for (var indexX = 0; indexX < gridSize; indexX++)
-                for (var indexY = 0; indexY < gridSize; indexY++)
-                    grid[indexX, indexY] = CreateBlock();
+            grid.ForEach((x,y) => grid[x, y] = CreateBlock());
         }
 
         private Block CreateBlock()

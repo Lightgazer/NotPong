@@ -9,12 +9,16 @@ namespace NotPong
     {
         ///<summary>Двигается, либо падение, либо свап</summary>
         Moving,
+
         ///<summary>Свапнутый блок, ждёт проверку на матч, затем возвращется или умирает</summary>
         Suspect,
+
         ///<summary>Умер, постепенно исчезает</summary>
         Dead,
+
         ///<summary>Разложился, можно падать на его место</summary>
         Rotten,
+
         ///<summary>Ожидает, если все блоки ожидают игрок может сделать свап</summary>
         Idle
     }
@@ -39,17 +43,16 @@ namespace NotPong
             this.texture = texture;
         }
 
-        public void FireBonus(Block[,] grid)
+        public void ActivateBonus(Block[,] grid)
         {
             var index = grid.Cast<Block>().ToList().FindIndex(block => block == this);
-            if(!IsBonusActive()) Bonus?.Activate(grid, new Point(index / GameSettings.GridSize, index % GameSettings.GridSize));
+            if (!IsBonusActive())
+                Bonus?.Activate(grid, new Point(index / GameSettings.GridSize, index % GameSettings.GridSize));
         }
 
         public bool IsBonusActive()
         {
-            if (Bonus is null)
-                return false;
-            return Bonus.Active;
+            return Bonus is {Active: true};
         }
 
         public void MoveFrom(Vector2 direction)
@@ -65,19 +68,23 @@ namespace NotPong
         {
             if (state == BlockState.Dead)
             {
-                Size = MyMath.MoveTowards(Size, 0.2f, (float)gameTime.ElapsedGameTime.TotalSeconds * GameSettings.AnimationSpeed);
-                if (Math.Abs(Size - 0.2f) < float.Epsilon && !IsBonusActive()) 
+                Size = MyMath.MoveTowards(Size, 0.2f,
+                    (float) gameTime.ElapsedGameTime.TotalSeconds * GameSettings.AnimationSpeed);
+                if (Math.Abs(Size - 0.2f) < float.Epsilon && !IsBonusActive())
                     state = BlockState.Rotten;
             }
 
             if (state == BlockState.Moving)
             {
-                MovementDisplacement = MyMath.MoveTowards(MovementDisplacement, new Vector2(0), (float)gameTime.ElapsedGameTime.TotalSeconds * GameSettings.BlockSize * 2 * GameSettings.AnimationSpeed);
+                MovementDisplacement = MyMath.MoveTowards(MovementDisplacement, new Vector2(0),
+                    (float) gameTime.ElapsedGameTime.TotalSeconds * GameSettings.BlockSize * 2 *
+                    GameSettings.AnimationSpeed);
                 if (MovementDisplacement == new Vector2(0))
                 {
                     state = lastState;
                 }
             }
+
             Bonus?.Update(gameTime);
         }
 

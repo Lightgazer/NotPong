@@ -5,8 +5,8 @@ namespace NotPong
 {
     internal abstract class Bonus
     {
-        public Texture2D BonusTexture { get; set; }
-        public bool Active { get; set; } = false;
+        public Texture2D Texture { get; set; }
+        public bool Active { get; set; }
 
         protected Point index;
         private Block[,] grid;
@@ -35,7 +35,7 @@ namespace NotPong
         protected void FireBlock(Point doomIndex)
         {
             var doomBlock = grid[doomIndex.X, doomIndex.Y];
-            doomBlock.FireBonus(grid);
+            doomBlock.ActivateBonus(grid);
             doomBlock.state = BlockState.Dead;
         }
     }
