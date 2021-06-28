@@ -42,7 +42,7 @@ namespace NotPong
         public void Update(GameTime gameTime)
         {
             UpdateBlocks(gameTime);
-            Score?.Add(CountNewDead());
+            // Score?.Add(CountNewDead());
 
             if (IsReadyForMatch())
             {
@@ -60,6 +60,17 @@ namespace NotPong
             DrawBlocks(spriteBatch, padding);
             DrawBonuses(spriteBatch, padding);
             DrawFrame(spriteBatch, padding);
+        }
+        
+        public void TryKillBlock(Point index)
+        {
+            if (IsIndexInBounds(index))
+                KillBlock(grid[index.X, index.Y]);
+        }
+
+        private static bool IsIndexInBounds(Point index)
+        {
+            return index.X >= 0 && index.X < gridSize && index.Y >= 0 && index.Y < gridSize;
         }
 
         private void DrawFrame(SpriteBatch spriteBatch, Vector2 padding)
@@ -138,31 +149,32 @@ namespace NotPong
             if (matchChain.Count < 3) return;
             matchChain.ForEach(block =>
             {
-                block.ActivateBonus(grid);
+                Bonus nextBonus = null;
                 if (block.crossingFlag)
                 {
-                    Score.Add(1);
-                    block.state = BlockState.Idle;
-                    block.Bonus = new BombBonus {Texture = bombTexture};
+                    nextBonus = new BombBonus {Texture = bombTexture};
                 }
                 else if (block.state == BlockState.Suspect && matchChain.Count > 3)
                 {
                     if (matchChain.Count > 4)
-                        block.Bonus = new BombBonus {Texture = bombTexture};
+                        nextBonus = new BombBonus {Texture = bombTexture};
                     else
-                        block.Bonus = new LineBonus {Texture = lineTexture, vertical = vertical};
-                    Score.Add(1);
-                    block.state = BlockState.Idle;
+                        nextBonus = new LineBonus {Texture = lineTexture, Vertical = vertical};
                 }
-                else
-                {
-                    block.state = BlockState.Dead;
-                }
+                KillBlock(block, nextBonus);
 
                 block.crossingFlag = true;
             });
         }
 
+        private void KillBlock(Block block, Bonus nextBonus = null)
+        {
+            Score?.Add(1);
+            block.ActivateBonus(grid);
+            block.state = BlockState.Dead;
+            block.NextBonus = nextBonus;
+        }
+        
         private void CleanCrossingFlags()
         {
             grid.ForEach(block => block.crossingFlag = false);
@@ -192,7 +204,7 @@ namespace NotPong
 
         private void UpdateBlocks(GameTime gameTime)
         {
-            grid.ForEach(block => block.Update(gameTime));
+            grid.ForEach(block => block.Update(gameTime, this));
         }
 
         private bool IsReadyForMatch()
@@ -208,7 +220,7 @@ namespace NotPong
         private bool IsReadyForDrop()
         {
             return grid.Cast<Block>().Any(block => block.state == BlockState.Rotten)
-                && grid.Cast<Block>().All(block => block.state != BlockState.Moving);
+                   && grid.Cast<Block>().All(block => block.state != BlockState.Moving);
         }
 
         private bool IsSwapAllowed(Point first, Point second)
@@ -267,6 +279,7 @@ namespace NotPong
                         return;
                     }
                 }
+
                 selectedIndex = click;
             }
         }
@@ -288,7 +301,7 @@ namespace NotPong
 
         private void PopulateGrid()
         {
-            grid.ForEach((x,y) => grid[x, y] = CreateBlock());
+            grid.ForEach((x, y) => grid[x, y] = CreateBlock());
         }
 
         private Block CreateBlock()

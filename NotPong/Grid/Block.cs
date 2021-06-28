@@ -25,9 +25,12 @@ namespace NotPong
 
     internal class Block
     {
+        private const float RottenSize = 0.2f;
+        
         public readonly int type;
         public BlockState state = BlockState.Idle;
         public Bonus Bonus { get; set; }
+        public Bonus NextBonus { get; set; }
         private float Size { get; set; } = 1;
         private Vector2 MovementDisplacement { get; set; } = new Vector2(0, 0);
         public bool morgueTiket = false;
@@ -47,7 +50,7 @@ namespace NotPong
         {
             var index = grid.Cast<Block>().ToList().FindIndex(block => block == this);
             if (!IsBonusActive())
-                Bonus?.Activate(grid, new Point(index / GameSettings.GridSize, index % GameSettings.GridSize));
+                Bonus?.Activate(new Point(index / GameSettings.GridSize, index % GameSettings.GridSize));
         }
 
         public bool IsBonusActive()
@@ -64,28 +67,11 @@ namespace NotPong
             state = BlockState.Moving;
         }
 
-        public void Update(GameTime gameTime)
+        public void Update(GameTime gameTime, GameGrid parent)
         {
-            if (state == BlockState.Dead)
-            {
-                Size = MyMath.MoveTowards(Size, 0.2f,
-                    (float) gameTime.ElapsedGameTime.TotalSeconds * GameSettings.AnimationSpeed);
-                if (Math.Abs(Size - 0.2f) < float.Epsilon && !IsBonusActive())
-                    state = BlockState.Rotten;
-            }
-
-            if (state == BlockState.Moving)
-            {
-                MovementDisplacement = MyMath.MoveTowards(MovementDisplacement, new Vector2(0),
-                    (float) gameTime.ElapsedGameTime.TotalSeconds * GameSettings.BlockSize * 2 *
-                    GameSettings.AnimationSpeed);
-                if (MovementDisplacement == new Vector2(0))
-                {
-                    state = lastState;
-                }
-            }
-
-            Bonus?.Update(gameTime);
+            ManageSize(gameTime);
+            ManageMovement(gameTime);
+            Bonus?.Update(gameTime, parent);
         }
 
         public void Draw(SpriteBatch spriteBatch, Vector2 position)
@@ -98,6 +84,43 @@ namespace NotPong
         {
             position += origin + MovementDisplacement;
             Bonus?.Draw(spriteBatch, position);
+        }
+        
+        private void ManageMovement(GameTime gameTime)
+        {
+            if (state == BlockState.Moving)
+            {
+                var delta = (float) gameTime.ElapsedGameTime.TotalSeconds * GameSettings.BlockSize * 2 *
+                            GameSettings.AnimationSpeed;
+                MovementDisplacement = MyMath.MoveTowards(MovementDisplacement, new Vector2(0), delta);
+                if (MovementDisplacement == new Vector2(0))
+                {
+                    state = lastState;
+                }
+            }
+        }
+
+        private void ManageSize(GameTime gameTime)
+        {
+            var targetSize = state == BlockState.Dead ? RottenSize : 1f;
+
+            var delta = (float) gameTime.ElapsedGameTime.TotalSeconds * GameSettings.AnimationSpeed;
+            Size = MyMath.MoveTowards(Size, targetSize, delta);
+            if (Math.Abs(Size - RottenSize) < float.Epsilon && !IsBonusActive())
+                DeathTrial();
+        }
+
+        private void DeathTrial()
+        {
+            if (NextBonus is { })
+            {
+                Bonus = NextBonus;
+                NextBonus = null;
+                state = BlockState.Idle;
+                return;
+            }
+
+            state = BlockState.Rotten;
         }
     }
 }
