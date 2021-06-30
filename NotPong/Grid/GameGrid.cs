@@ -9,17 +9,17 @@ namespace NotPong
 {
     internal class GameGrid
     {
-        public ScoreWidget Score { private get; set; }
+        public int Score { get; private set; }
 
-        private static int gridSize = GameSettings.GridSize;
-        private static int blockSize = GameSettings.BlockSize;
+        private const int GridSize = GameSettings.GridSize;
+        private const int BlockSize = GameSettings.BlockSize;
         private static readonly Random Random = new Random();
 
         private readonly Texture2D[] blockTextures;
         private readonly Texture2D frameTexture;
         private readonly Texture2D lineTexture;
         private readonly Texture2D bombTexture;
-        private readonly Block[,] grid = new Block[gridSize, gridSize];
+        private readonly Block[,] grid = new Block[GridSize, GridSize];
         private MouseState lastMouseState;
         private Rectangle gridRectangle;
         private Point? selectedIndex;
@@ -32,17 +32,16 @@ namespace NotPong
             this.bombTexture = bombTexture;
             PopulateGrid();
 
+            const int sideLength = GridSize * BlockSize;
             gridRectangle = new Rectangle(
-                new Point((GameSettings.Width - gridSize * blockSize) / 2,
-                    (GameSettings.Height - gridSize * blockSize) / 2),
-                new Point(gridSize * blockSize, gridSize * blockSize)
+                new Point((GameSettings.Width - sideLength) / 2, (GameSettings.Height - sideLength) / 2),
+                new Point(sideLength)
             );
         }
 
         public void Update(GameTime gameTime)
         {
             UpdateBlocks(gameTime);
-            // Score?.Add(CountNewDead());
 
             if (IsReadyForMatch())
             {
@@ -70,14 +69,23 @@ namespace NotPong
 
         private static bool IsIndexInBounds(Point index)
         {
-            return index.X >= 0 && index.X < gridSize && index.Y >= 0 && index.Y < gridSize;
+            return index.X >= 0 && index.X < GridSize && index.Y >= 0 && index.Y < GridSize;
+        }
+        
+        private static bool IsSwapAllowed(Point first, Point second)
+        {
+            if (first.X == second.X)
+                return Math.Abs(first.Y - second.Y) == 1;
+            if (first.Y == second.Y)
+                return Math.Abs(first.X - second.X) == 1;
+            return false;
         }
 
         private void DrawFrame(SpriteBatch spriteBatch, Vector2 padding)
         {
             if (selectedIndex is { } pointIndex)
             {
-                var position = new Vector2(pointIndex.X * blockSize, pointIndex.Y * blockSize);
+                var position = new Vector2(pointIndex.X * BlockSize, pointIndex.Y * BlockSize);
                 position += padding;
                 spriteBatch.Draw(frameTexture, position, Color.White);
             }
@@ -85,12 +93,12 @@ namespace NotPong
 
         private void DrawBlocks(SpriteBatch spriteBatch, Vector2 padding)
         {
-            for (var indexX = 0; indexX < gridSize; indexX++)
+            for (var indexX = 0; indexX < GridSize; indexX++)
             {
-                for (var indexY = 0; indexY < gridSize; indexY++)
+                for (var indexY = 0; indexY < GridSize; indexY++)
                 {
                     var block = grid[indexX, indexY];
-                    var position = new Vector2((indexX * blockSize), (indexY * blockSize));
+                    var position = new Vector2((indexX * BlockSize), (indexY * BlockSize));
                     position += padding;
                     block.Draw(spriteBatch, position);
                 }
@@ -99,12 +107,12 @@ namespace NotPong
 
         private void DrawBonuses(SpriteBatch spriteBatch, Vector2 padding)
         {
-            for (var indexX = 0; indexX < gridSize; indexX++)
+            for (var indexX = 0; indexX < GridSize; indexX++)
             {
-                for (var indexY = 0; indexY < gridSize; indexY++)
+                for (var indexY = 0; indexY < GridSize; indexY++)
                 {
                     var block = grid[indexX, indexY];
-                    var position = new Vector2((indexX * blockSize), (indexY * blockSize));
+                    var position = new Vector2((indexX * BlockSize), (indexY * BlockSize));
                     position += padding;
                     block.DrawBonus(spriteBatch, position);
                 }
@@ -120,11 +128,11 @@ namespace NotPong
 
         private void TriggerMatches(bool vertical)
         {
-            for (var indexX = 0; indexX < gridSize; indexX++)
+            for (var indexX = 0; indexX < GridSize; indexX++)
             {
                 var currentType = -1;
                 var matchChain = new List<Block>();
-                for (var indexY = 0; indexY < gridSize; indexY++)
+                for (var indexY = 0; indexY < GridSize; indexY++)
                 {
                     var block = vertical ? grid[indexY, indexX] : grid[indexX, indexY];
                     if (currentType == block.type)
@@ -169,7 +177,7 @@ namespace NotPong
 
         private void KillBlock(Block block, Bonus nextBonus = null)
         {
-            Score?.Add(1);
+            Score++;
             block.ActivateBonus(grid);
             block.state = BlockState.Dead;
             block.NextBonus = nextBonus;
@@ -223,15 +231,6 @@ namespace NotPong
                    && grid.Cast<Block>().All(block => block.state != BlockState.Moving);
         }
 
-        private bool IsSwapAllowed(Point first, Point second)
-        {
-            if (first.X == second.X)
-                return Math.Abs(first.Y - second.Y) == 1;
-            if (first.Y == second.Y)
-                return Math.Abs(first.X - second.X) == 1;
-            return false;
-        }
-
         private void SwapBlocks(Point first, Point second, BlockState setState)
         {
             var movementDirection = (first - second).ToVector2();
@@ -253,17 +252,6 @@ namespace NotPong
                 SwapBlocks(indices[0], indices[1], BlockState.Idle);
             if (indices.Count == 1)
                 grid[indices[0].X, indices[0].Y].state = BlockState.Idle;
-        }
-
-        private int CountNewDead()
-        {
-            var newArrivals = grid.Cast<Block>()
-                .Where(block => block.state == BlockState.Dead)
-                .Where(block => !block.morgueTiket)
-                .ToList();
-            var ret = newArrivals.Count();
-            newArrivals.ForEach(block => block.morgueTiket = true);
-            return ret;
         }
 
         private void ManagePlayerInput()
@@ -292,7 +280,7 @@ namespace NotPong
                 mouseState.LeftButton == ButtonState.Pressed &&
                 gridRectangle.Contains(mouseState.Position))
             {
-                option = (mouseState.Position - gridRectangle.Location) / new Point(blockSize);
+                option = (mouseState.Position - gridRectangle.Location) / new Point(BlockSize);
             }
 
             lastMouseState = mouseState;

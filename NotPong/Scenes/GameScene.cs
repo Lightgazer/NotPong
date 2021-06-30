@@ -15,7 +15,7 @@ namespace NotPong
         private readonly SpriteFont font;
 
         private GameGrid grid;
-        private ScoreWidget scoreView;
+        private ScoreWidget scoreWidget;
         private SceneTimer timer;
 
         public GameScene(ContentManager content)
@@ -30,8 +30,7 @@ namespace NotPong
         public void Start()
         {
             grid = new GameGrid(blockTextures, frameTexture, lineTexture, bombTexture);
-            scoreView = new ScoreWidget(font);
-            grid.Score = scoreView;
+            scoreWidget = new ScoreWidget(font);
             timer = new SceneTimer(font, 60d);
         }
 
@@ -39,13 +38,14 @@ namespace NotPong
         {
             grid.Update(gameTime);
             timer.Update(gameTime);
+            scoreWidget.Score = grid.Score;
         }
 
         public void Draw(SpriteBatch spriteBatch)
         {
             grid.Draw(spriteBatch);
-            scoreView.Draw(spriteBatch);
             timer.Draw(spriteBatch);
+            scoreWidget.Draw(spriteBatch);
         }
 
         private static Texture2D[] LoadBlockTextures(ContentManager content)
