@@ -27,22 +27,21 @@ namespace NotPong
     {
         private const float RottenSize = 0.2f;
         
-        public readonly int type;
-        public BlockState state = BlockState.Idle;
-        public Bonus Bonus { get; set; }
+        public readonly int Type;
+        public BlockState State = BlockState.Idle;
+        public bool CrossingFlag = false;
+        public static Vector2 Origin = new Vector2(GameSettings.BlockSize / 2);
         public Bonus NextBonus { get; set; }
-        private float Size { get; set; } = 1;
-        private Vector2 MovementDisplacement { get; set; } = new Vector2(0, 0);
-        public bool morgueTiket = false;
-        public bool crossingFlag = false;
-        public static Vector2 origin = new Vector2(GameSettings.BlockSize / 2);
+        private Bonus bonus;
+        private float size = 1;
+        private Vector2 movementDisplacement = new Vector2(0, 0);
 
         private readonly Texture2D texture;
         private BlockState lastState;
 
         public Block(int type, Texture2D texture)
         {
-            this.type = type;
+            Type = type;
             this.texture = texture;
         }
 
@@ -50,63 +49,63 @@ namespace NotPong
         {
             var index = grid.Cast<Block>().ToList().FindIndex(block => block == this);
             if (!IsBonusActive())
-                Bonus?.Activate(new Point(index / GameSettings.GridSize, index % GameSettings.GridSize));
+                bonus?.Activate(new Point(index / GameSettings.GridSize, index % GameSettings.GridSize));
         }
 
         public bool IsBonusActive()
         {
-            return Bonus is {Active: true};
+            return bonus is {Active: true};
         }
 
         public void MoveFrom(Vector2 direction)
         {
-            if (state == BlockState.Moving) return;
+            if (State == BlockState.Moving) return;
             direction.Normalize();
-            MovementDisplacement = direction * GameSettings.BlockSize;
-            lastState = state;
-            state = BlockState.Moving;
+            movementDisplacement = direction * GameSettings.BlockSize;
+            lastState = State;
+            State = BlockState.Moving;
         }
 
         public void Update(GameTime gameTime, GameGrid parent)
         {
             ManageSize(gameTime);
             ManageMovement(gameTime);
-            Bonus?.Update(gameTime, parent);
+            bonus?.Update(gameTime, parent);
         }
 
         public void Draw(SpriteBatch spriteBatch, Vector2 position)
         {
-            position += origin + MovementDisplacement;
-            spriteBatch.Draw(texture, position, null, Color.White, 0f, origin, Size, SpriteEffects.None, 0f);
+            position += Origin + movementDisplacement;
+            spriteBatch.Draw(texture, position, null, Color.White, 0f, Origin, size, SpriteEffects.None, 0f);
         }
 
         public void DrawBonus(SpriteBatch spriteBatch, Vector2 position)
         {
-            position += origin + MovementDisplacement;
-            Bonus?.Draw(spriteBatch, position);
+            position += Origin + movementDisplacement;
+            bonus?.Draw(spriteBatch, position);
         }
         
         private void ManageMovement(GameTime gameTime)
         {
-            if (state == BlockState.Moving)
+            if (State == BlockState.Moving)
             {
                 var delta = (float) gameTime.ElapsedGameTime.TotalSeconds * GameSettings.BlockSize * 2 *
                             GameSettings.AnimationSpeed;
-                MovementDisplacement = MyMath.MoveTowards(MovementDisplacement, new Vector2(0), delta);
-                if (MovementDisplacement == new Vector2(0))
+                movementDisplacement = MyMath.MoveTowards(movementDisplacement, new Vector2(0), delta);
+                if (movementDisplacement == new Vector2(0))
                 {
-                    state = lastState;
+                    State = lastState;
                 }
             }
         }
 
         private void ManageSize(GameTime gameTime)
         {
-            var targetSize = state == BlockState.Dead ? RottenSize : 1f;
+            var targetSize = State == BlockState.Dead ? RottenSize : 1f;
 
             var delta = (float) gameTime.ElapsedGameTime.TotalSeconds * GameSettings.AnimationSpeed;
-            Size = MyMath.MoveTowards(Size, targetSize, delta);
-            if (Math.Abs(Size - RottenSize) < float.Epsilon && !IsBonusActive())
+            size = MyMath.MoveTowards(size, targetSize, delta);
+            if (Math.Abs(size - RottenSize) < float.Epsilon && !IsBonusActive())
                 DeathTrial();
         }
 
@@ -114,13 +113,13 @@ namespace NotPong
         {
             if (NextBonus is { })
             {
-                Bonus = NextBonus;
+                bonus = NextBonus;
                 NextBonus = null;
-                state = BlockState.Idle;
+                State = BlockState.Idle;
                 return;
             }
 
-            state = BlockState.Rotten;
+            State = BlockState.Rotten;
         }
     }
 }

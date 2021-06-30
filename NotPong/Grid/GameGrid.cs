@@ -135,14 +135,14 @@ namespace NotPong
                 for (var indexY = 0; indexY < GridSize; indexY++)
                 {
                     var block = vertical ? grid[indexY, indexX] : grid[indexX, indexY];
-                    if (currentType == block.type)
+                    if (currentType == block.Type)
                     {
                         matchChain.Add(block);
                     }
                     else
                     {
                         ProcessChain(matchChain, vertical);
-                        currentType = block.type;
+                        currentType = block.Type;
                         matchChain.Clear();
                         matchChain.Add(block);
                     }
@@ -158,11 +158,11 @@ namespace NotPong
             matchChain.ForEach(block =>
             {
                 Bonus nextBonus = null;
-                if (block.crossingFlag)
+                if (block.CrossingFlag)
                 {
                     nextBonus = new BombBonus {Texture = bombTexture};
                 }
-                else if (block.state == BlockState.Suspect && matchChain.Count > 3)
+                else if (block.State == BlockState.Suspect && matchChain.Count > 3)
                 {
                     if (matchChain.Count > 4)
                         nextBonus = new BombBonus {Texture = bombTexture};
@@ -171,7 +171,7 @@ namespace NotPong
                 }
                 KillBlock(block, nextBonus);
 
-                block.crossingFlag = true;
+                block.CrossingFlag = true;
             });
         }
 
@@ -179,20 +179,20 @@ namespace NotPong
         {
             Score++;
             block.ActivateBonus(grid);
-            block.state = BlockState.Dead;
+            block.State = BlockState.Dead;
             block.NextBonus = nextBonus;
         }
         
         private void CleanCrossingFlags()
         {
-            grid.ForEach(block => block.crossingFlag = false);
+            grid.ForEach(block => block.CrossingFlag = false);
         }
 
         private void TriggerDrop()
         {
             grid.ForEach((block, point) =>
             {
-                if (block.state == BlockState.Rotten) MarkDrop(point);
+                if (block.State == BlockState.Rotten) MarkDrop(point);
             });
         }
 
@@ -217,18 +217,18 @@ namespace NotPong
 
         private bool IsReadyForMatch()
         {
-            return grid.Cast<Block>().All(block => block.state == BlockState.Idle || block.state == BlockState.Suspect);
+            return grid.Cast<Block>().All(block => block.State == BlockState.Idle || block.State == BlockState.Suspect);
         }
 
         private bool IsIdle()
         {
-            return grid.Cast<Block>().All(block => block.state == BlockState.Idle);
+            return grid.Cast<Block>().All(block => block.State == BlockState.Idle);
         }
 
         private bool IsReadyForDrop()
         {
-            return grid.Cast<Block>().Any(block => block.state == BlockState.Rotten)
-                   && grid.Cast<Block>().All(block => block.state != BlockState.Moving);
+            return grid.Cast<Block>().Any(block => block.State == BlockState.Rotten)
+                   && grid.Cast<Block>().All(block => block.State != BlockState.Moving);
         }
 
         private void SwapBlocks(Point first, Point second, BlockState setState)
@@ -236,8 +236,8 @@ namespace NotPong
             var movementDirection = (first - second).ToVector2();
             var firstBlock = grid[first.X, first.Y];
             var secondBlock = grid[second.X, second.Y];
-            firstBlock.state = setState;
-            secondBlock.state = setState;
+            firstBlock.State = setState;
+            secondBlock.State = setState;
             firstBlock.MoveFrom(movementDirection);
             secondBlock.MoveFrom(-movementDirection);
             grid[second.X, second.Y] = firstBlock;
@@ -246,12 +246,12 @@ namespace NotPong
 
         private void ReleaseSuspects()
         {
-            var indices = grid.FindAllIndexOf(block => block.state == BlockState.Suspect);
+            var indices = grid.FindAllIndexOf(block => block.State == BlockState.Suspect);
 
             if (indices.Count == 2)
                 SwapBlocks(indices[0], indices[1], BlockState.Idle);
             if (indices.Count == 1)
-                grid[indices[0].X, indices[0].Y].state = BlockState.Idle;
+                grid[indices[0].X, indices[0].Y].State = BlockState.Idle;
         }
 
         private void ManagePlayerInput()

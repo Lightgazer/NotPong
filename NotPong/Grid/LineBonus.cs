@@ -32,12 +32,12 @@ namespace NotPong
         public override void Draw(SpriteBatch spriteBatch, Vector2 position)
         {
             var rotation = Vertical ? 1.57f : 0f;
-            spriteBatch.Draw(Texture, position, null, Color.White, rotation, Block.origin, 1, SpriteEffects.None, 0f);
+            spriteBatch.Draw(Texture, position, null, Color.White, rotation, Block.Origin, 1, SpriteEffects.None, 0f);
             if (Active)
             {
                 var vector = Vertical ? new Vector2(effectPosition, 0) : new Vector2(0, effectPosition);
-                spriteBatch.Draw(Texture, position + vector, null, Color.White, rotation, Block.origin, 1, SpriteEffects.None, 0f);
-                spriteBatch.Draw(Texture, position - vector, null, Color.White, rotation, Block.origin, 1, SpriteEffects.None, 0f);
+                spriteBatch.Draw(Texture, position + vector, null, Color.White, rotation, Block.Origin, 1, SpriteEffects.None, 0f);
+                spriteBatch.Draw(Texture, position - vector, null, Color.White, rotation, Block.Origin, 1, SpriteEffects.None, 0f);
             }
         }
     }
