@@ -7,7 +7,7 @@ namespace NotPong
     {
         private double detonateTime = 250;
 
-        public override void Update(GameTime gameTime, GameGrid grid)
+        public override void Update(GameTime gameTime)
         {
             if (Active)
             {
@@ -20,8 +20,8 @@ namespace NotPong
                     {
                         for (var y = -1; y <= 1; y++)
                         {
-                            var doomIndex = new Point(index.X + x, index.Y + y);
-                            grid.TryKillBlock(doomIndex);
+                            var target = new Point(index.X + x, index.Y + y);
+                            TryShoot(target);
                         }
                     }
                 }

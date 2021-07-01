@@ -8,7 +8,7 @@ namespace NotPong
         public bool Vertical { set; get; }
         private float effectPosition = 0;
 
-        public override void Update(GameTime gameTime, GameGrid grid)
+        public override void Update(GameTime gameTime)
         {
             if (Active)
             {
@@ -19,10 +19,10 @@ namespace NotPong
 
                 var effectIndex = (int)(effectPosition / GameSettings.BlockSize);
                 var forwardIndex = Vertical ? new Point(index.X + effectIndex, index.Y) : new Point(index.X, index.Y + effectIndex);
-                grid.TryKillBlock(forwardIndex);
+                TryShoot(forwardIndex);
 
                 var backwardIndex = Vertical ? new Point (index.X - effectIndex, index.Y) : new Point (index.X, index.Y - effectIndex);
-                grid.TryKillBlock(backwardIndex);
+                TryShoot(backwardIndex);
 
                 if (effectPosition / GameSettings.BlockSize > stepsNeeded)
                     Active = false;

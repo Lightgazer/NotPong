@@ -37,6 +37,8 @@ namespace NotPong
                 new Point((GameSettings.Width - sideLength) / 2, (GameSettings.Height - sideLength) / 2),
                 new Point(sideLength)
             );
+
+            Bonus.OnBonusShoot += TryKillBlock;
         }
 
         public void Update(GameTime gameTime)
@@ -60,12 +62,6 @@ namespace NotPong
             DrawBonuses(spriteBatch, padding);
             DrawFrame(spriteBatch, padding);
         }
-        
-        public void TryKillBlock(Point index)
-        {
-            if (IsIndexInBounds(index))
-                KillBlock(grid[index.X, index.Y]);
-        }
 
         private static bool IsIndexInBounds(Point index)
         {
@@ -79,6 +75,12 @@ namespace NotPong
             if (first.Y == second.Y)
                 return Math.Abs(first.X - second.X) == 1;
             return false;
+        }
+        
+        private void TryKillBlock(Point index)
+        {
+            if (IsIndexInBounds(index))
+                KillBlock(grid[index.X, index.Y]);
         }
 
         private void DrawFrame(SpriteBatch spriteBatch, Vector2 padding)
@@ -212,7 +214,7 @@ namespace NotPong
 
         private void UpdateBlocks(GameTime gameTime)
         {
-            grid.ForEach(block => block.Update(gameTime, this));
+            grid.ForEach(block => block.Update(gameTime));
         }
 
         private bool IsReadyForMatch()

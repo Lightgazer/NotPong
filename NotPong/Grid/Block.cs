@@ -66,11 +66,11 @@ namespace NotPong
             State = BlockState.Moving;
         }
 
-        public void Update(GameTime gameTime, GameGrid parent)
+        public void Update(GameTime gameTime)
         {
             ManageSize(gameTime);
             ManageMovement(gameTime);
-            bonus?.Update(gameTime, parent);
+            bonus?.Update(gameTime);
         }
 
         public void Draw(SpriteBatch spriteBatch, Vector2 position)
