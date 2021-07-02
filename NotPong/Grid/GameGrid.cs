@@ -41,6 +41,11 @@ namespace NotPong
             Bonus.OnBonusShoot += TryKillBlock;
         }
 
+        public void Unsubscribe()
+        {
+            Bonus.OnBonusShoot -= TryKillBlock;
+        }
+
         public void Update(GameTime gameTime)
         {
             UpdateBlocks(gameTime);

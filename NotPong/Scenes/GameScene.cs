@@ -34,6 +34,11 @@ namespace NotPong
             timer = new SceneTimer(font, 60d);
         }
 
+        public void Stop()
+        {
+            grid.Unsubscribe();
+        }
+
         public void Update(GameTime gameTime)
         {
             grid.Update(gameTime);

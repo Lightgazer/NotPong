@@ -23,10 +23,7 @@ namespace NotPong
             }
         }
         
-        protected void TryShoot(Point target)
-        {
-            OnBonusShoot?.Invoke(target);
-        }
+        protected void TryShoot(Point target) => OnBonusShoot?.Invoke(target);
 
         public abstract void Update(GameTime gameTime);
         public abstract void Draw(SpriteBatch spriteBatch, Vector2 position);
