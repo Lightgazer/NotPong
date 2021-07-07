@@ -26,7 +26,7 @@ namespace NotPong
         {
             if (Scenes.ElementAtOrDefault(index) is { } scene)
             {
-                CurrentScene.Stop();
+                CurrentScene?.Stop();
                 CurrentScene = scene;
                 CurrentScene.Start();
             }
